@@ -1,0 +1,88 @@
+name: AgentMesh CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+
+jobs:
+  backend-tests:
+    name: Backend Tests (FastAPI + pytest)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov httpx
+
+      - name: Run backend unit tests
+        run: |
+          pytest -v
+
+      # Optional coverage check (non-blocking if you want flexibility)
+      - name: Run coverage report
+        run: |
+          pytest --cov=app --cov-report=term --cov-report=xml
+        continue-on-error: true
+
+  frontend-tests:
+    name: Frontend Tests (React + TS)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run frontend unit tests
+        run: |
+          npm run test -- --run
+
+      # Optional: build check to ensure UI compiles
+      - name: Build frontend
+        run: |
+          npm run build
+
+  system-build:
+    name: Docker Build Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build backend Docker image
+        run: |
+          docker build -t agentmesh-backend ./backend
+
+      - name: Run backend container (smoke test)
+        run: |
+          docker run -d -p 8000:8000 agentmesh-backend
+          sleep 10
+          curl --fail http://localhost:8000/api/v1/health || exit 1
