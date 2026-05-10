@@ -21,6 +21,94 @@ This system is designed to be:
 
 ---
 
+# CRITICAL PROTOCOL COMPLIANCE REQUIREMENT (IMMUTABLE)
+
+This system MUST strictly comply with the Google A2A (Agent-to-Agent) protocol specification defined at:
+
+[Google A2A Protocol Specification](https://github.com/a2aproject/A2A?utm_source=chatgpt.com)
+
+This requirement is NON-NEGOTIABLE and supersedes any inferred architectural assumptions.
+
+---
+
+# A2A COMPLIANCE RULES (STRICT)
+
+You MUST treat the official A2A specification as the canonical protocol source.
+
+The system MUST:
+
+- strictly follow A2A Agent Card schema semantics
+- preserve compatibility with official A2A discovery expectations
+- preserve protocol-defined field meanings
+- preserve protocol-defined naming conventions where applicable
+- preserve interoperability with external A2A-compatible agents and registries
+- avoid proprietary deviations from A2A behavior
+- avoid redefining protocol semantics
+- avoid introducing incompatible schema mutations
+- avoid inventing non-standard protocol behaviors
+
+If any ambiguity exists:
+- prefer A2A specification behavior
+- do NOT invent behavior heuristically
+
+---
+
+# A2A AGENT CARD VALIDATION RULES
+
+All ingested agent cards MUST be:
+
+- validated against A2A-compatible structure
+- normalized without violating A2A semantics
+- stored without destructive mutation
+- retrievable in protocol-compatible form
+
+The registry MUST preserve:
+- original raw agent card
+- normalized internal representation
+- protocol-compatible external representation
+
+DO NOT:
+- remove required A2A fields
+- rename protocol fields
+- reinterpret protocol-defined meanings
+- silently coerce invalid structures into valid ones
+
+Invalid A2A cards MUST fail deterministically with explicit validation errors.
+
+---
+
+# A2A INTEROPERABILITY RULES
+
+The system MUST assume that:
+- external agents are independently implemented
+- external registries may consume AgentMesh output
+- protocol interoperability is a primary system objective
+
+Therefore:
+
+- all externally exposed agent metadata MUST remain A2A-compatible
+- API responses involving agent cards MUST preserve protocol fidelity
+- capability discovery MUST NOT break A2A compatibility
+- internal abstractions MUST NOT leak into protocol-facing payloads
+
+---
+
+# A2A EVOLUTION RULE
+
+The architecture MUST allow future alignment with:
+- future A2A protocol revisions
+- federation mechanisms
+- distributed registry interoperability
+- cross-registry discovery
+- remote agent negotiation flows
+
+BUT:
+- do NOT implement speculative protocol extensions now
+- do NOT invent unofficial A2A extensions
+- do NOT add unsupported protocol assumptions
+
+---
+
 # CORE ARCHITECTURE PRINCIPLES
 
 You MUST follow these principles:
@@ -132,7 +220,7 @@ DO NOT:
 
 # AGENT CARD MODEL (STRICT)
 
-Each agent MUST conform to:
+Each agent MUST conform to A2A-compatible semantics and include:
 
 - id (string, canonical)
 - name (string)
@@ -312,6 +400,7 @@ System MUST be designed so future additions are easy:
 - distributed registry (future)
 - federation across registries (future)
 - observability enhancements (future)
+- future A2A protocol evolution support
 
 BUT:
 DO NOT implement these now.
@@ -324,7 +413,9 @@ The system must:
 - run immediately after generation
 - be consistent across all layers
 - strictly follow API contract
+- strictly follow A2A protocol semantics
 - avoid architectural drift or hallucination
+- preserve external interoperability
 
 Design a clean production-ready architecture for this system.
 
@@ -332,7 +423,9 @@ Focus on:
 - folder structure
 - module boundaries
 - data flow between API, service, DB, workers
+- A2A protocol compliance boundaries
 - placement of capability normalization system
+- validation flow for A2A agent cards
 - Docker integration layout
 
 Do NOT implement code yet.

@@ -13,6 +13,9 @@ Constraints:
 - no external schedulers allowed
 - no Redis or Celery
 
+Must:
+- preserve A2A-compatible agent metadata behavior
+
 Must NOT modify:
 - API response schema
 - database structure
