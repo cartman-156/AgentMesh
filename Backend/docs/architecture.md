@@ -14,7 +14,7 @@ graph TB
     subgraph "API Layer"
         AgentsRoute["POST/GET /api/v1/agents"]
         SearchRoute["GET /api/v1/agents/search"]
-        HealthRoute["GET/POST /api/v1/agents/{id}/health"]
+        HealthRoute["GET /api/v1/agents/{id}/health"]
         DebugRoute["GET /api/v1/debug/*"]
     end
     
