@@ -24,7 +24,7 @@ def search_agents(
     """
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM agents")
+        cursor.execute("SELECT * FROM agents WHERE approved = 1 AND deregistered = 0")
         rows = cursor.fetchall()
     
     # Convert rows to dictionaries

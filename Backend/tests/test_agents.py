@@ -3,6 +3,8 @@ import json
 from unittest.mock import patch, MagicMock
 from app.services.agent_service import (
     register_agent,
+    approve_agent,
+    deregister_agent,
     get_agent_by_id,
     validate_agent_card,
     generate_agent_id
@@ -176,3 +178,66 @@ class TestAgentRetrieval:
         """Test retrieving nonexistent agent returns None."""
         agent = get_agent_by_id("nonexistent")
         assert agent is None
+
+
+class TestAgentApproval:
+    """Test approval workflow for registered agents."""
+
+    def test_approve_registered_agent(self, sample_agent_card):
+        result = register_agent(agent_card=sample_agent_card)
+        agent_id = result["id"]
+
+        approval = approve_agent(agent_id)
+
+        assert approval["id"] == agent_id
+        assert approval["status"] == "approved"
+
+        # Verify approval state is persisted
+        agent = get_agent_by_id(agent_id)
+        assert agent is not None
+        assert agent.get("approved", 0) == 1
+
+    def test_approve_idempotent(self, sample_agent_card):
+        result = register_agent(agent_card=sample_agent_card)
+        agent_id = result["id"]
+
+        first = approve_agent(agent_id)
+        second = approve_agent(agent_id)
+
+        assert first == second
+        assert second["status"] == "approved"
+
+    def test_approve_nonexistent_agent_fails(self):
+        with pytest.raises(ValueError, match="not found"):
+            approve_agent("nonexistent")
+
+
+class TestAgentDeregistration:
+    """Test agent deregistration workflow."""
+
+    def test_deregister_registered_agent(self, sample_agent_card):
+        result = register_agent(agent_card=sample_agent_card)
+        agent_id = result["id"]
+
+        dereg = deregister_agent(agent_id)
+
+        assert dereg["id"] == agent_id
+        assert dereg["status"] == "deregistered"
+
+        agent = get_agent_by_id(agent_id)
+        assert agent is not None
+        assert agent.get("deregistered", 0) == 1
+
+    def test_deregister_idempotent(self, sample_agent_card):
+        result = register_agent(agent_card=sample_agent_card)
+        agent_id = result["id"]
+
+        first = deregister_agent(agent_id)
+        second = deregister_agent(agent_id)
+
+        assert first == second
+        assert second["status"] == "deregistered"
+
+    def test_deregister_nonexistent_agent_fails(self):
+        with pytest.raises(ValueError, match="not found"):
+            deregister_agent("nonexistent")

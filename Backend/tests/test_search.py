@@ -1,6 +1,6 @@
 import pytest
 from app.services.agents_search_service import search_agents
-from app.services.agent_service import register_agent
+from app.services.agent_service import register_agent, approve_agent, deregister_agent
 
 
 class TestAgentSearch:
@@ -8,9 +8,13 @@ class TestAgentSearch:
 
     @pytest.fixture
     def sample_agents(self, sample_agent_card, sample_agent_card_with_symbols):
-        """Register sample agents for testing."""
+        """Register and approve sample agents for testing."""
         agent1 = register_agent(agent_card=sample_agent_card)
+        approve_agent(agent1["id"])
+
         agent2 = register_agent(agent_card=sample_agent_card_with_symbols)
+        approve_agent(agent2["id"])
+
         return agent1["id"], agent2["id"]
 
     def test_search_all_agents(self, sample_agents):
@@ -154,19 +158,35 @@ class TestAgentSearch:
 class TestSearchIntegration:
     """Integration tests for search with other components."""
 
-    def test_search_finds_registered_agent(self, sample_agent_card):
-        """Test that search finds newly registered agents."""
-        register_agent(agent_card=sample_agent_card)
+    def test_search_finds_approved_agent(self, sample_agent_card):
+        """Test that search finds approved agents."""
+        result = register_agent(agent_card=sample_agent_card)
+        approve_agent(result["id"])
         
         result = search_agents(name="test-weather-agent", match="exact")
         
         assert len(result["results"]) == 1
+    def test_search_excludes_deregistered_agent(self, sample_agent_card):
+        """Deregistered agents should not appear in discovery."""
+        result = register_agent(agent_card=sample_agent_card)
+        agent_id = result["id"]
+        approve_agent(agent_id)
+        deregister_agent(agent_id)
 
+        result = search_agents(name="test-weather-agent", match="exact")
+        assert len(result["results"]) == 0
     def test_search_finds_by_normalized_capability(self, sample_agent_card_with_symbols):
         """Test that search finds agents with normalized capabilities."""
-        register_agent(agent_card=sample_agent_card_with_symbols)
+        result = register_agent(agent_card=sample_agent_card_with_symbols)
+        approve_agent(result["id"])
         
         # Search by canonical category
         result = search_agents(capability="finance")
         
         assert len(result["results"]) >= 1
+
+    def test_search_ignores_unapproved_agents(self, sample_agent_card):
+        """Unapproved agents should not be discoverable."""
+        register_agent(agent_card=sample_agent_card)
+        result = search_agents(name="test-weather-agent", match="exact")
+        assert len(result["results"]) == 0

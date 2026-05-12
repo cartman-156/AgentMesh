@@ -114,6 +114,8 @@ def register_agent(
         "status": "healthy",
         "latency_ms": None,
         "last_seen": None,
+        "approved": 0,
+        "deregistered": 0,
     }
     
     # Store in database
@@ -141,7 +143,14 @@ def store_agent(agent_data: Dict[str, Any]) -> None:
         existing = cursor.fetchone()
         
         if existing:
-            # Update existing agent
+            # Preserve existing approval and deregistration state when updating an existing agent.
+            cursor.execute("SELECT approved, deregistered FROM agents WHERE id = ?", (agent_data["id"],))
+            row = cursor.fetchone()
+            current_approved = row[0] if row else 0
+            current_deregistered = row[1] if row else 0
+            updated_approved = agent_data.get("approved", current_approved)
+            updated_deregistered = agent_data.get("deregistered", current_deregistered)
+
             cursor.execute('''
                 UPDATE agents SET
                     name = ?,
@@ -152,7 +161,9 @@ def store_agent(agent_data: Dict[str, Any]) -> None:
                     raw_agent_card = ?,
                     status = ?,
                     latency_ms = ?,
-                    last_seen = ?
+                    last_seen = ?,
+                    approved = ?,
+                    deregistered = ?
                 WHERE id = ?
             ''', (
                 agent_data["name"],
@@ -164,14 +175,16 @@ def store_agent(agent_data: Dict[str, Any]) -> None:
                 agent_data["status"],
                 agent_data["latency_ms"],
                 agent_data["last_seen"],
+                updated_approved,
+                updated_deregistered,
                 agent_data["id"]
             ))
         else:
             # Insert new agent
             cursor.execute('''
                 INSERT INTO agents
-                (id, name, description, url, version, capabilities, raw_agent_card, status, latency_ms, last_seen)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, name, description, url, version, capabilities, raw_agent_card, status, latency_ms, last_seen, approved, deregistered)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 agent_data["id"],
                 agent_data["name"],
@@ -182,7 +195,9 @@ def store_agent(agent_data: Dict[str, Any]) -> None:
                 agent_data["raw_agent_card"],
                 agent_data["status"],
                 agent_data["latency_ms"],
-                agent_data["last_seen"]
+                agent_data["last_seen"],
+                agent_data.get("approved", 0),
+                agent_data.get("deregistered", 0)
             ))
         
         conn.commit()
@@ -252,6 +267,7 @@ def refresh_agent(agent_id: str) -> Dict[str, Any]:
         "status": agent.get("status", "healthy"),  # Preserve current status
         "latency_ms": agent.get("latency_ms"),  # Preserve latency
         "last_seen": agent.get("last_seen"),  # Preserve last_seen
+        "approved": agent.get("approved", 0),
     }
     
     # Update agent in database
@@ -261,6 +277,55 @@ def refresh_agent(agent_id: str) -> Dict[str, Any]:
         "status": "refreshed",
         "source_refetched": True
     }
+
+
+def deregister_agent(agent_id: str) -> Dict[str, Any]:
+    """
+    Soft-deregister an agent while preserving registry history.
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT deregistered FROM agents WHERE id = ?", (agent_id,))
+        row = cursor.fetchone()
+
+        if not row:
+            raise ValueError(f"Agent {agent_id} not found")
+
+        if row[0] == 1:
+            return {"id": agent_id, "status": "deregistered"}
+
+        cursor.execute(
+            "UPDATE agents SET deregistered = 1 WHERE id = ?",
+            (agent_id,)
+        )
+        conn.commit()
+
+    return {"id": agent_id, "status": "deregistered"}
+
+
+def approve_agent(agent_id: str) -> Dict[str, Any]:
+    """
+    Approve a registered agent so it becomes discoverable.
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM agents WHERE id = ?", (agent_id,))
+        row = cursor.fetchone()
+
+        if not row:
+            raise ValueError(f"Agent {agent_id} not found")
+
+        agent = dict(row)
+        if agent.get("approved", 0) == 1:
+            return {"id": agent_id, "status": "approved"}
+
+        cursor.execute(
+            "UPDATE agents SET approved = 1 WHERE id = ?",
+            (agent_id,)
+        )
+        conn.commit()
+
+    return {"id": agent_id, "status": "approved"}
 
 
 def list_agents(
@@ -280,7 +345,7 @@ def list_agents(
         cursor = conn.cursor()
         
         # Build query with filters
-        query = "SELECT * FROM agents WHERE 1=1"
+        query = "SELECT * FROM agents WHERE approved = 1 AND deregistered = 0"
         params = []
         
         # Filter by status

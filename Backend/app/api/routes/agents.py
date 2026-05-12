@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
-from app.services.agent_service import register_agent, list_agents, get_agent_by_id, refresh_agent
+from app.services.agent_service import register_agent, list_agents, get_agent_by_id, refresh_agent, approve_agent, deregister_agent
 
 router = APIRouter()
 
@@ -69,6 +69,38 @@ def get_agent(agent_id: str):
         return {"agent": agent}
     except HTTPException:
         raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{agent_id}/approve")
+def post_approve_agent(agent_id: str):
+    """
+    Approve a registered agent so it becomes discoverable.
+
+    Returns: { id, status: "approved" }
+    """
+    try:
+        result = approve_agent(agent_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{agent_id}")
+def delete_agent(agent_id: str):
+    """
+    Deregister an agent while preserving registry history.
+
+    Returns: { id, status: "deregistered" }
+    """
+    try:
+        result = deregister_agent(agent_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

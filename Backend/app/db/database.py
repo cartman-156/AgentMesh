@@ -26,9 +26,20 @@ def init_db():
                 raw_agent_card TEXT,
                 status TEXT,
                 latency_ms INTEGER,
-                last_seen TEXT
+                last_seen TEXT,
+                approved INTEGER NOT NULL DEFAULT 0,
+                deregistered INTEGER NOT NULL DEFAULT 0
             )
         ''')
+
+        # Ensure older databases are migrated to include approval and deregistration state.
+        cursor.execute("PRAGMA table_info(agents)")
+        columns = [row[1] for row in cursor.fetchall()]
+        if "approved" not in columns:
+            cursor.execute("ALTER TABLE agents ADD COLUMN approved INTEGER NOT NULL DEFAULT 0")
+        if "deregistered" not in columns:
+            cursor.execute("ALTER TABLE agents ADD COLUMN deregistered INTEGER NOT NULL DEFAULT 0")
+
         conn.commit()
 
 @contextlib.contextmanager
