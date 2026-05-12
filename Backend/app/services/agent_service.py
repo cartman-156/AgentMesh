@@ -349,7 +349,7 @@ def list_agents(
         cursor = conn.cursor()
         
         # Build query with filters
-        query = "SELECT * FROM agents WHERE approved = 1 AND deregistered = 0"
+        query = "SELECT * FROM agents WHERE 1 = 1"
         params = []
         
         # Filter by status
