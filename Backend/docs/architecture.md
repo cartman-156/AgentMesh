@@ -12,7 +12,7 @@ graph TB
     FastAPI["FastAPI Application"]
     
     subgraph "API Layer"
-        AgentsRoute["POST/GET /api/v1/agents"]
+        AgentsRoute["POST/GET /api/v1/agents<br/>POST /api/v1/agents/{agent_id}/approve<br/>DELETE /api/v1/agents/{agent_id}<br/>POST /api/v1/agents/{agent_id}/refresh"]
         SearchRoute["GET /api/v1/agents/search"]
         HealthRoute["GET /api/v1/agents/{id}/health"]
         DebugRoute["GET /api/v1/debug/*"]
@@ -95,14 +95,16 @@ graph LR
 ## Module Organization
 
 ### API Layer (`app/api/routes/`)
-- **agents.py**: Agent registration, retrieval, refresh
+- **agents.py**: Agent registration, lifecycle management, retrieval, refresh
   - POST /api/v1/agents - Register agent
   - GET /api/v1/agents - List agents with filters
   - GET /api/v1/agents/{agent_id} - Get specific agent
+  - POST /api/v1/agents/{agent_id}/approve - Approve or reject an agent
+  - DELETE /api/v1/agents/{agent_id} - Deregister an agent
   - POST /api/v1/agents/{agent_id}/refresh - Refresh agent
 
 - **agents_search.py**: Agent discovery
-  - GET /api/v1/agents/search - Search with deterministic filtering
+  - GET /api/v1/agents/search - Search with deterministic filtering and lifecycle-aware status output
 
 - **health.py**: Health monitoring endpoints
   - GET /api/v1/health - System health
@@ -111,13 +113,16 @@ graph LR
 ### Service Layer (`app/services/`)
 - **agent_service.py**: Core agent management logic
   - `register_agent()` - Validates, normalizes, stores agents
+  - `approve_agent()` - Approve or reject registered agents
+  - `deregister_agent()` - Soft deregister agent while retaining record
+  - `reject_agent()` - Hard delete rejected agents
   - `list_agents()` - Filters agents by status/capability
   - `get_agent_by_id()` - Retrieves single agent
   - `refresh_agent()` - Updates agent from URL
   - `store_agent()` - Persists to database
 
-- **agents_search_service.py**: Deterministic search
-  - `search_agents()` - Multi-filter agent search with AND semantics
+- **agents_search_service.py**: Deterministic search with lifecycle state awareness
+  - `search_agents()` - Multi-filter agent search with AND semantics, returning full registry results and status flags
 
 - **health_service.py**: Health check operations
   - `check_agent_health()` - Pings agent health endpoint
@@ -141,6 +146,7 @@ graph LR
 - **database.py**: SQLite persistence
   - `init_db()` - Creates schema
   - `get_db_connection()` - Context manager for connections
+  - Stores lifecycle state fields: approved and deregistered
 
 ### Worker Layer (`app/workers/`)
 - **health_check_worker.py**: Background health monitoring
@@ -176,7 +182,9 @@ CREATE TABLE agents (
     raw_agent_card TEXT,  -- JSON: Complete A2A agent card
     status TEXT,  -- "healthy" or "unhealthy"
     latency_ms INTEGER,  -- Last health check latency
-    last_seen TEXT  -- ISO timestamp of last health check
+    last_seen TEXT,  -- ISO timestamp of last health check
+    approved INTEGER NOT NULL DEFAULT 0,  -- Lifecycle approval state
+    deregistered INTEGER NOT NULL DEFAULT 0  -- Lifecycle soft-deregistration state
 )
 ```
 
@@ -226,5 +234,6 @@ All responses follow deterministic, A2A-compatible JSON structure:
 3. **In-process workers**: No Celery, Redis, or external schedulers
 4. **Strict layer separation**: Routes → Services → DB
 5. **Minimal instrumentation**: Debug layer adds observability without mutating logic
-6. **Canonical capabilities**: Single source of truth in capabilities_map.py
-7. **Immutable API contract**: Debug endpoints are additive, never modify existing endpoints
+6. **Lifecycle state handling**: Approved agents are enabled for discovery, deregistered agents retain registry state, and rejected agents are hard-deleted
+7. **Canonical capabilities**: Single source of truth in capabilities_map.py
+9. **Immutable API contract**: Debug endpoints are additive, never modify existing endpoints
