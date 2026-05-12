@@ -24,11 +24,16 @@ def search_agents(
     """
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM agents WHERE approved = 1 AND deregistered = 0")
+        cursor.execute("SELECT * FROM agents")
         rows = cursor.fetchall()
     
     # Convert rows to dictionaries
-    agents = [dict(row) for row in rows]
+    agents = []
+    for row in rows:
+        agent = dict(row)
+        if agent.get("deregistered") == 1:
+            agent["status"] = "deregistered"
+        agents.append(agent)
     
     # Apply agent_id filter (exact match only)
     if agent_id is not None:

@@ -166,15 +166,19 @@ class TestSearchIntegration:
         result = search_agents(name="test-weather-agent", match="exact")
         
         assert len(result["results"]) == 1
-    def test_search_excludes_deregistered_agent(self, sample_agent_card):
-        """Deregistered agents should not appear in discovery."""
+
+    def test_search_includes_deregistered_agent(self, sample_agent_card):
+        """Deregistered agents should still appear in search results."""
         result = register_agent(agent_card=sample_agent_card)
         agent_id = result["id"]
         approve_agent(agent_id)
         deregister_agent(agent_id)
 
         result = search_agents(name="test-weather-agent", match="exact")
-        assert len(result["results"]) == 0
+        assert len(result["results"]) == 1
+        assert result["results"][0]["status"] == "deregistered"
+        assert result["results"][0]["deregistered"] == 1
+
     def test_search_finds_by_normalized_capability(self, sample_agent_card_with_symbols):
         """Test that search finds agents with normalized capabilities."""
         result = register_agent(agent_card=sample_agent_card_with_symbols)
@@ -185,8 +189,9 @@ class TestSearchIntegration:
         
         assert len(result["results"]) >= 1
 
-    def test_search_ignores_unapproved_agents(self, sample_agent_card):
-        """Unapproved agents should not be discoverable."""
+    def test_search_includes_unapproved_agents(self, sample_agent_card):
+        """Unapproved agents should still appear in search results."""
         register_agent(agent_card=sample_agent_card)
         result = search_agents(name="test-weather-agent", match="exact")
-        assert len(result["results"]) == 0
+        assert len(result["results"]) == 1
+        assert result["results"][0]["approved"] == 0
