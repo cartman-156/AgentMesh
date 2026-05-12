@@ -2,8 +2,14 @@ import pytest
 import tempfile
 import sqlite3
 import os
+import sys
 from pathlib import Path
 from unittest.mock import patch, MagicMock
+
+# Ensure the Backend package root is on the import path for tests
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
 # Configure test database
 @pytest.fixture(scope="session")
