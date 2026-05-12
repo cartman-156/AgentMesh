@@ -307,10 +307,33 @@ def deregister_agent(agent_id: str) -> Dict[str, Any]:
     return {"id": agent_id, "status": "deregistered"}
 
 
-def approve_agent(agent_id: str) -> Dict[str, Any]:
+def reject_agent(agent_id: str) -> Dict[str, Any]:
     """
-    Approve a registered agent so it becomes discoverable.
+    Reject an agent by permanently removing it from the registry.
     """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM agents WHERE id = ?", (agent_id,))
+        row = cursor.fetchone()
+
+        if row:
+            cursor.execute("DELETE FROM agents WHERE id = ?", (agent_id,))
+            conn.commit()
+
+    return {"id": agent_id, "status": "rejected"}
+
+
+def approve_agent(agent_id: str, action: str = "approve") -> Dict[str, Any]:
+    """
+    Approve or reject an agent using the approval endpoint.
+    """
+    normalized_action = (action or "approve").lower()
+    if normalized_action not in {"approve", "reject"}:
+        raise ValueError("Invalid action")
+
+    if normalized_action == "reject":
+        return reject_agent(agent_id)
+
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM agents WHERE id = ?", (agent_id,))

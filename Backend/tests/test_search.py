@@ -195,3 +195,13 @@ class TestSearchIntegration:
         result = search_agents(name="test-weather-agent", match="exact")
         assert len(result["results"]) == 1
         assert result["results"][0]["approved"] == 0
+
+    def test_search_excludes_rejected_agents(self, sample_agent_card):
+        """Rejected agents should not remain discoverable."""
+        result = register_agent(agent_card=sample_agent_card)
+        agent_id = result["id"]
+        approve_agent(agent_id)
+        approve_agent(agent_id, action="reject")
+
+        result = search_agents(name="test-weather-agent", match="exact")
+        assert len(result["results"]) == 0

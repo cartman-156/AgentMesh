@@ -207,6 +207,26 @@ class TestAgentApproval:
         assert first == second
         assert second["status"] == "approved"
 
+    def test_reject_registered_agent(self, sample_agent_card):
+        result = register_agent(agent_card=sample_agent_card)
+        agent_id = result["id"]
+
+        rejection = approve_agent(agent_id, action="reject")
+
+        assert rejection["id"] == agent_id
+        assert rejection["status"] == "rejected"
+        assert get_agent_by_id(agent_id) is None
+
+    def test_reject_idempotent(self, sample_agent_card):
+        result = register_agent(agent_card=sample_agent_card)
+        agent_id = result["id"]
+
+        first = approve_agent(agent_id, action="reject")
+        second = approve_agent(agent_id, action="reject")
+
+        assert first == second
+        assert second["status"] == "rejected"
+
     def test_approve_nonexistent_agent_fails(self):
         with pytest.raises(ValueError, match="not found"):
             approve_agent("nonexistent")

@@ -11,6 +11,10 @@ class RegisterAgentRequest(BaseModel):
     url: Optional[str] = None
 
 
+class ApprovalActionRequest(BaseModel):
+    action: Optional[str] = "approve"
+
+
 @router.post("")
 def post_register_agent(request: RegisterAgentRequest):
     """
@@ -74,14 +78,14 @@ def get_agent(agent_id: str):
 
 
 @router.post("/{agent_id}/approve")
-def post_approve_agent(agent_id: str):
+def post_approve_agent(agent_id: str, request: ApprovalActionRequest = ApprovalActionRequest()):
     """
-    Approve a registered agent so it becomes discoverable.
+    Approve or reject a registered agent.
 
-    Returns: { id, status: "approved" }
+    Returns: { id, status: "approved" } or { id, status: "rejected" }
     """
     try:
-        result = approve_agent(agent_id)
+        result = approve_agent(agent_id, action=request.action)
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
