@@ -32,8 +32,8 @@ app = FastAPI(
 )
 
 # Register routers per API_Contract.md
-app.include_router(agents.router, prefix="/api/v1/agents", tags=["agents"])
 app.include_router(agents_search.router, prefix="/api/v1/agents", tags=["search"])
+app.include_router(agents.router, prefix="/api/v1/agents", tags=["agents"])
 app.include_router(health.router, prefix="/api/v1", tags=["health"])
 
 # Register debug routes (read-only observability layer)
