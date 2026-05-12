@@ -240,7 +240,11 @@ def refresh_agent(agent_id: str) -> Dict[str, Any]:
     url = agent.get("url")
     
     if not url:
-        raise ValueError(f"Agent {agent_id} has no URL for refresh")
+        # Silently skip refresh if no URL is available, as we have no source to refetch from
+        return {
+            "status": "refreshed",
+            "source_refetched": False
+        }
     
     # Fetch fresh agent card from URL
     updated_agent_card = fetch_agent_card_from_url(url)
