@@ -104,7 +104,11 @@ class TestAgentRefresh:
 
     def test_refresh_missing_url_fails(self, sample_agent_card):
         """Test refresh fails when stored agent has no URL."""
-        result = register_agent(agent_card=sample_agent_card)
+        card_without_url = sample_agent_card.copy()
+        if "url" in card_without_url:
+            del card_without_url["url"]
+            
+        result = register_agent(agent_card=card_without_url)
         agent_id = result["id"]
 
         with pytest.raises(ValueError, match="has no URL"):

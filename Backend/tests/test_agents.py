@@ -81,8 +81,9 @@ class TestAgentRegistration:
 
     def test_register_url_fetch_failure(self):
         """Test URL ingestion with network failure."""
+        import requests
         with patch("app.services.agent_service.requests.get") as mock_get:
-            mock_get.side_effect = Exception("Network error")
+            mock_get.side_effect = requests.RequestException("Network error")
             
             with pytest.raises(ValueError, match="Failed to fetch"):
                 register_agent(url="https://example.com")

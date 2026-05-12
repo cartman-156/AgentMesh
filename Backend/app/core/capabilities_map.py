@@ -19,6 +19,7 @@ CANONICAL_CAPABILITIES: dict[str, list[str]] = {
         "stock",
         "stocks",
         "market",
+        "stock market",
         "trading",
         "investment",
         "banking",
@@ -120,4 +121,4 @@ def get_canonical(normalized_term: str) -> str:
 
     Returns 'unclassified' if no mapping exists.
     """
-    return _TERM_TO_CANONICAL.get(normalized_term, "unclassified")
+    return _TERM_TO_CANONICAL.get(normalized_term.lower(), "unclassified")
