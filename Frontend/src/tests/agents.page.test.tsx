@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import AgentsPage from '../pages/AgentsPage';
 import { listAgents } from '../api/agentApi';
 import type { AgentModel } from '../api/types';
@@ -50,7 +51,11 @@ describe('AgentsPage', () => {
   it('renders agent list correctly', async () => {
     mockListAgents.mockResolvedValue({ agents: mockAgents, total: 2 });
 
-    render(<AgentsPage />);
+    render(
+      <MemoryRouter>
+        <AgentsPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Weather Agent')).toBeInTheDocument();
@@ -64,7 +69,11 @@ describe('AgentsPage', () => {
   it('displays status badges', async () => {
     mockListAgents.mockResolvedValue({ agents: mockAgents, total: 2 });
 
-    render(<AgentsPage />);
+    render(
+      <MemoryRouter>
+        <AgentsPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('approved')).toBeInTheDocument();
@@ -75,7 +84,11 @@ describe('AgentsPage', () => {
   it('shows canonical capabilities', async () => {
     mockListAgents.mockResolvedValue({ agents: mockAgents, total: 2 });
 
-    render(<AgentsPage />);
+    render(
+      <MemoryRouter>
+        <AgentsPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('weather')).toBeInTheDocument();
@@ -86,7 +99,11 @@ describe('AgentsPage', () => {
   it('handles empty state', async () => {
     mockListAgents.mockResolvedValue({ agents: [], total: 0 });
 
-    render(<AgentsPage />);
+    render(
+      <MemoryRouter>
+        <AgentsPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('No agents found.')).toBeInTheDocument();
@@ -96,7 +113,11 @@ describe('AgentsPage', () => {
   it('filters by status', async () => {
     mockListAgents.mockResolvedValue({ agents: mockAgents, total: 2 });
 
-    render(<AgentsPage />);
+    render(
+      <MemoryRouter>
+        <AgentsPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText('All')).toBeInTheDocument();
@@ -111,7 +132,11 @@ describe('AgentsPage', () => {
     const rawAgent = { ...mockAgents[0] };
     mockListAgents.mockResolvedValue({ agents: [rawAgent], total: 1 });
 
-    render(<AgentsPage />);
+    render(
+      <MemoryRouter>
+        <AgentsPage />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText(rawAgent.name)).toBeInTheDocument();
