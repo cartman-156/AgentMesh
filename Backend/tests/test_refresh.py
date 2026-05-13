@@ -111,8 +111,9 @@ class TestAgentRefresh:
         result = register_agent(agent_card=card_without_url)
         agent_id = result["id"]
 
-        _, refetched = refresh_agent(agent_id)
-        assert refetched is False
+        result = refresh_agent(agent_id)
+        assert result["status"] == "refreshed"
+        assert result["source_refetched"] is False
 
     def test_refresh_invalid_agent_card_from_url(self, agent_with_url):
         """Test refresh failure when fetched agent card is invalid."""
