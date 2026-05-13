@@ -9,6 +9,7 @@ It provides:
 - capability-based search UI
 - system health dashboard
 - debug/observability views
+- agent lifecycle management UI (approve/reject/deregister)
 
 ---
 
@@ -87,7 +88,7 @@ Do NOT:
 - mutate backend response structures locally
 
 Reference protocol:
-[Google A2A Protocol Specification](https://github.com/a2aproject/A2A?utm_source=chatgpt.com)
+https://github.com/a2aproject/A2A
 
 ---
 
@@ -101,12 +102,17 @@ Reference protocol:
 
 ---
 
-# BACKEND DEPENDENCY RULE
+# BACKEND DEPENDENCY RULE (UPDATED)
 
 Frontend MUST ONLY use:
 
 - /api/v1/agents
+- /api/v1/agents/{agent_id}
 - /api/v1/agents/search
+- /api/v1/agents/{agent_id}/health
+- /api/v1/agents/{agent_id}/refresh
+- /api/v1/agents/{agent_id}/approve
+- /api/v1/agents/{agent_id} (DELETE)
 - /api/v1/health
 - /api/v1/debug/*
 
@@ -114,7 +120,27 @@ DO NOT assume any other endpoints exist.
 
 ---
 
-# UI MODULES
+# AGENT LIFECYCLE RULE (NEW CRITICAL RULE)
+
+Frontend MUST support and correctly render lifecycle states:
+
+- registered
+- approved
+- deregistered
+
+Behavior rules:
+- registered: newly added agents pending approval
+- approved: active + discoverable agents
+- deregistered: removed from active registry (must not be interactable except history display if shown)
+
+Frontend MUST:
+- display lifecycle status in all agent views
+- reflect status changes immediately after API actions
+- never infer lifecycle state from UI behavior
+
+---
+
+# UI MODULES (UPDATED)
 
 Frontend must include:
 
@@ -124,6 +150,30 @@ Frontend must include:
 4. Capability Search Interface
 5. System Health Dashboard
 6. Debug/Observability Viewer
+7. Agent Lifecycle Actions Module:
+   - Approve Agent
+   - Reject Agent (hard delete)
+   - Deregister Agent
+
+---
+
+# LIFECYCLE ACTION RULES
+
+## Approve
+- triggers: POST /api/v1/agents/{agent_id}/approve
+- sets agent state to "approved"
+- updates UI state immediately after success
+
+## Reject
+- triggers: POST /api/v1/agents/{agent_id}/approve (reject action semantics if supported)
+  OR backend-defined reject mechanism
+- result: agent is permanently removed
+- agent must disappear from all lists after success
+
+## Deregister
+- triggers: DELETE /api/v1/agents/{agent_id}
+- sets state to "deregistered"
+- agent must not appear in active discovery
 
 ---
 
@@ -141,6 +191,7 @@ Frontend must include:
 
 - Use a single state management approach (lightweight preferred)
 - Avoid over-engineering (no Redux unless necessary)
+- lifecycle transitions must always be API-driven
 
 ---
 
@@ -221,6 +272,7 @@ Focus on:
 - typed frontend models
 - dashboard layout architecture
 - shadcn/ui integration
+- lifecycle-aware UI behavior
 - maintainable state management
 
 Do NOT implement backend changes.

@@ -5,6 +5,7 @@ CRITICAL RULE:
 - Do NOT add backend logic
 - Focus ONLY on layout structure and component composition
 - UI must map directly to existing API endpoints
+- UI must reflect agent lifecycle state (registered / approved / deregistered)
 
 ---
 
@@ -14,7 +15,11 @@ The application must use a consistent layout:
 
 - Left sidebar navigation
 - Main content area
-- Top header (optional system status)
+- Top header (system status + optional global health snapshot)
+
+Header (optional):
+- system health indicator (/api/v1/health)
+- total agents summary (/api/v1/agents)
 
 ---
 
@@ -27,23 +32,33 @@ The application must use a consistent layout:
 - Health (/health)
 - Debug (/debug)
 
+Lifecycle actions are NOT separate routes:
+- Approve / Reject / Deregister are contextual actions inside Agent Detail + Agent List
+
 ---
 
 # 1. DASHBOARD PAGE LAYOUT (/)
 
-Purpose: system overview
+Purpose: system + lifecycle overview
 
 Layout:
 
 Top summary cards:
 - Total agents
+- Registered agents
+- Approved agents
+- Deregistered agents
 - Healthy agents
 - Unhealthy agents
-- Unclassified capabilities count
 
 Below:
+
 - Capability distribution chart (canonical only)
 - Recent agent activity list
+- Lifecycle activity feed:
+  - approvals
+  - rejections
+  - deregistrations
 
 ---
 
@@ -53,6 +68,10 @@ Layout:
 
 Top bar:
 - search/filter input (capability + status)
+- status filter:
+  - registered
+  - approved
+  - deregistered
 
 Main section:
 - table/grid of agents
@@ -60,9 +79,19 @@ Main section:
 Each agent card shows:
 - name
 - id
-- status badge
+- lifecycle status badge
 - canonical capabilities (tags)
 - latency indicator (if available)
+
+Actions per agent:
+- View (/agents/:id)
+- Approve
+- Reject
+- Deregister
+
+Rules:
+- Reject and Deregister are destructive actions
+- Approve is primary action when status = registered
 
 Click → agent detail page
 
@@ -74,29 +103,37 @@ Layout:
 
 Header:
 - agent name
-- status badge
+- lifecycle status badge
+- quick action buttons:
+  - Approve
+  - Reject
+  - Deregister
+  - Refresh
 
 Sections:
 
-1. Metadata panel
-   - id
-   - url
-   - version
-   - provider
+## 1. Metadata panel
+- id
+- url
+- version
+- provider
+- lifecycle status (must be visible)
 
-2. Capability panel
-   - raw capabilities
-   - normalized capabilities
-   - canonical capabilities
+## 2. Capability panel
+- raw capabilities
+- normalized capabilities
+- canonical capabilities
 
-3. Health panel
-   - status
-   - latency
-   - last seen
+## 3. Health panel
+- status
+- latency
+- last seen
+- health endpoint result (/api/v1/agents/:id/health)
 
-4. Debug panel (if data available from /debug)
-   - ingestion trace
-   - last health failures
+## 4. Debug panel (if available from /api/v1/debug/*)
+- ingestion trace
+- capability normalization trace
+- health failures
 
 ---
 
@@ -117,7 +154,7 @@ Submit button:
 
 Result panel:
 - agent_id
-- status
+- lifecycle status (expected: registered)
 - normalization summary
 
 ---
@@ -128,12 +165,20 @@ Layout:
 
 Search bar:
 - capability input
+- name input (optional)
 
 Filters:
-- exact / partial match toggle
+- match type:
+  - exact
+  - partial
+- lifecycle filter:
+  - registered
+  - approved
+  - deregistered
 
 Results:
 - ranked agent list
+- lifecycle status badge
 - match reason (if available)
 - canonical mapping hint (optional display)
 
@@ -149,9 +194,13 @@ System overview:
 
 Table:
 - agent name
-- status
+- lifecycle status
+- health status
 - latency
 - last seen
+
+Optional drilldown:
+- click agent → /agents/:id
 
 ---
 
@@ -170,10 +219,12 @@ A. Agent debug view
 - raw → normalized → canonical capabilities
 - ingestion trace
 - health history
+- lifecycle transitions history (if available)
 
 B. System state view
 - capability distribution
 - unclassified capabilities
+- lifecycle distribution
 - global stats
 
 ---
@@ -184,9 +235,11 @@ B. System state view
 - Keep components reusable:
   - AgentCard
   - CapabilityBadge
-  - StatusBadge
+  - StatusBadge (must support lifecycle states)
+  - LifecycleBadge
   - MetricCard
   - DebugPanel
+  - ActionButtonGroup (approve/reject/deregister)
 - Avoid page-specific hardcoding
 - Keep layout consistent across pages
 
@@ -197,6 +250,16 @@ B. System state view
 - UI must strictly reflect backend API data
 - No mock transformations beyond formatting
 - No frontend capability normalization logic
+- No inference of lifecycle state beyond API response
+
+---
+
+# STATE RULE
+
+- UI state must be derived from backend responses
+- After any lifecycle action:
+  - refetch agent list/detail from API
+  - do not locally mutate lifecycle state without confirmation
 
 ---
 
@@ -205,3 +268,4 @@ B. System state view
 - Sidebar collapses on mobile
 - Tables become stacked cards on mobile
 - Debug panels become accordion sections
+- Action buttons become grouped dropdown on small screens
