@@ -7,7 +7,7 @@ on:
 
 jobs:
   backend-tests:
-    name: Python unit tests
+    name: Python Tests
     runs-on: ubuntu-latest
 
     defaults:
@@ -29,7 +29,7 @@ jobs:
           pip install -r ../requirements.txt
           pip install pytest pytest-cov httpx
 
-      - name: Run backend unit tests
+      - name: Run Python Tests
         run: |
           pytest -v
 
@@ -39,7 +39,7 @@ jobs:
         continue-on-error: true
 
   frontend-tests:
-    name: UI unit tests
+    name: UI Tests
     runs-on: ubuntu-latest
 
     defaults:
@@ -66,7 +66,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run frontend unit tests
+      - name: Run UI Tests
         run: npm test -- --run
 
       - name: Generate coverage report
