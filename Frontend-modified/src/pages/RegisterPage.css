@@ -1,0 +1,211 @@
+.register-page {
+  max-width: 960px;
+}
+
+.register-page__header {
+  max-width: 900px;
+}
+
+.register-page__title {
+  margin: 0;
+  font-size: 2.25rem;
+  line-height: 1.05;
+  color: var(--text-primary);
+}
+
+.register-page__copy {
+  margin: 0.75rem 0 0;
+  color: var(--text-secondary);
+  max-width: 720px;
+  line-height: 1.7;
+}
+
+.register-page__card {
+  padding: 2rem;
+  border-radius: 1.5rem;
+  background: #f7fbff;
+  border: 1px solid #d5e1ef;
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.08);
+}
+
+.register-page__toggle {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.25rem;
+  background: #eaf2fb;
+  border-radius: 1.1rem;
+  border: 1px solid #d5e1ef;
+}
+
+.register-page__toggle-button {
+  flex: 1;
+  border: none;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+.register-page__toggle-button.active {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
+}
+
+.register-page__toggle-button:hover {
+  transform: translateY(-1px);
+}
+
+.register-page__section {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.register-page__hint {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.register-page__form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.register-page__field {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.register-page__label {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.register-page__textarea,
+.register-page__input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background: #ffffff;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.register-page__editor {
+  min-height: 280px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+  color: var(--text-primary);
+  overflow: auto;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.register-page__editor:focus-within {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.register-page__editor textarea {
+  outline: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+  width: 100%;
+  min-height: 280px;
+}
+
+.token.json-key {
+  color: #7c3aed;
+}
+
+.token.json-string {
+  color: #16a34a;
+}
+
+.token.json-number {
+  color: #0f766e;
+}
+
+.token.json-literal {
+  color: #c2410c;
+}
+
+.register-page__textarea::placeholder,
+.register-page__input::placeholder {
+  color: var(--text-muted);
+}
+
+.register-page__textarea:focus,
+.register-page__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.register-page__submit {
+  width: 100%;
+  max-width: 320px;
+  margin-top: 0.25rem;
+  border-radius: 1rem;
+  border: none;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.register-page__submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.register-page__submit:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.register-page__feedback {
+  display: grid;
+  gap: 1rem;
+}
+
+.register-page__feedback-card {
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+}
+
+.register-page__feedback-card.success {
+  border-color: rgba(22, 163, 74, 0.25);
+  background: rgba(220, 252, 231, 0.85);
+  color: var(--success);
+}
+
+.register-page__feedback-card.error {
+  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(254, 242, 242, 0.9);
+  color: var(--danger);
+}
+
+.register-page__feedback-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.register-page__feedback-text {
+  margin: 0.75rem 0 0;
+  line-height: 1.7;
+}

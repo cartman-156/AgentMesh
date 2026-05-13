@@ -1,0 +1,124 @@
+.agent-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.agent-card__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.agent-card__title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.agent-card__description {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+}
+
+.agent-card__meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.agent-card__status-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.agent-card__tags {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.agent-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+  color: var(--text-secondary);
+}
+
+.agent-card__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.action-button {
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.75rem;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  color: var(--text-primary);
+  background: var(--surface-soft);
+}
+
+/* .action-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+} */
+
+.action-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-button--approve {
+  background: #16a34a !important;
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.action-button--primary {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.action-button--danger {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: var(--danger);
+}
+.action-button--deregister {
+  background: #ef4444 !important;
+  color: #ffffff;
+  border-color: var(--danger);
+}
+
+.action-button--secondary {
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.action-button__icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.action-button--text {
+  padding: 0.65rem 0.9rem;
+  min-width: auto;
+}

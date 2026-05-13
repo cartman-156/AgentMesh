@@ -44,7 +44,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: Frontend
+        working-directory: Frontend-modified
 
     steps:
       - name: Checkout repository
@@ -58,8 +58,8 @@ jobs:
       - name: Cache node_modules
         uses: actions/cache@v4
         with:
-          path: Frontend/node_modules
-          key: frontend-node-modules-${{ hashFiles('Frontend/package.json') }}
+          path: Frontend-modified/node_modules
+          key: frontend-node-modules-${{ hashFiles('Frontend-modified/package.json') }}
           restore-keys: |
             frontend-node-modules-
 
@@ -154,7 +154,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Frontend/Dockerfile
+          file: ./Frontend-modified/Dockerfile
           push: true
           tags: ${{ steps.frontend-meta.outputs.tags }}
           labels: ${{ steps.frontend-meta.outputs.labels }}
