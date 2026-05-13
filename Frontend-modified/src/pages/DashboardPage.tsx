@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { getSystemHealth, listAgents } from '../api';
 import type { AgentModel, SystemHealthResponse } from '../api/types';
 import MetricCard from '../components/MetricCard';
@@ -69,6 +70,19 @@ const DashboardPage = () => {
   ).length;
   const deregisteredCount = agents.filter((agent) => agent.deregistered === 1).length;
 
+  const capabilityChartData = capabilityDistribution.slice(0, 6).map((item) => ({
+    capability: item.capability,
+    count: item.count,
+  }));
+
+  const statusChartData = [
+    { name: 'Registered', value: registeredCount },
+    { name: 'Approved', value: approvedCount },
+    { name: 'Deregistered', value: deregisteredCount },
+  ];
+
+  const statusColors = ['#2563eb', '#16a34a', '#ef4444'];
+
   return (
     <main className="page-shell">
       <div className="dashboard-page">
@@ -90,6 +104,62 @@ const DashboardPage = () => {
               <MetricCard label="Registered agents" value={registeredCount} />
               <MetricCard label="Approved agents" value={approvedCount} />
               <MetricCard label="Deregistered agents" value={deregisteredCount} />
+            </section>
+
+            <section className="dashboard-page__analytics">
+              <div className="analytics-card">
+                <div className="analytics-card__header">
+                  <h2 className="analytics-card__title">Top Capabilities</h2>
+                  <p className="analytics-card__copy">The most common canonical capability tags across your active agents.</p>
+                </div>
+                <div className="chart-wrapper">
+                {capabilityChartData.length === 0 ? (
+                  <div className="analytics-no-data">No capability chart data available yet.</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={capabilityChartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(100,116,139,0.2)" />
+                      <XAxis dataKey="capability" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+                      <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+                      <Tooltip contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                      <Bar dataKey="count" fill="var(--accent)" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+              </div>
+
+              <div className="analytics-card">
+                <div className="analytics-card__header">
+                  <h2 className="analytics-card__title">Agent Status Share</h2>
+                  <p className="analytics-card__copy">Breakdown of registered, approved, and deregistered agents.</p>
+                </div>
+                <div className="chart-wrapper">
+                  {statusChartData.every((entry) => entry.value === 0) ? (
+                    <div className="analytics-no-data">No status chart data available yet.</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={statusChartData}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius={50}
+                          outerRadius={80}
+                          paddingAngle={4}
+                          label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                        >
+                          {statusChartData.map((entry, index) => (
+                            <Cell key={`cell-${entry.name}`} fill={statusColors[index % statusColors.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                        <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: 'var(--text-secondary)' }}>{value}</span>} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
             </section>
 
             <section className="dashboard-page__stats">

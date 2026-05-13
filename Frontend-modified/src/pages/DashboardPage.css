@@ -31,6 +31,51 @@
   border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
+.dashboard-page__analytics {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.analytics-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: var(--card-shadow);
+}
+
+.analytics-card__header {
+  margin-bottom: 1rem;
+}
+
+.analytics-card__title {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.analytics-card__copy {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.chart-wrapper {
+  height: 340px;
+  min-height: 340px;
+}
+
+.analytics-no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
 .dashboard-page__stats {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
