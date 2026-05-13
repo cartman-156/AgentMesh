@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import AgentsPage from '../pages/AgentsPage';
 import { listAgents } from '../api/agentApi';
 import type { AgentModel } from '../api/types';

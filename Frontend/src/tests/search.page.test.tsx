@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import SearchPage from '../pages/SearchPage';
 import { searchAgents } from '../api/agentApi';
 import type { SearchResult, SearchAgentsResponse } from '../api/types';
