@@ -11,7 +11,10 @@ Must:
   raw_capabilities
   normalized_capabilities
   canonical_capabilities
+- preserve original A2A capability values in raw storage
+- avoid mutating protocol-visible semantics
 
 Do NOT:
 - inline capability mapping anywhere except capabilities_map.py
 - modify API contract
+- overwrite original raw capabilities
