@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 import asyncio
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.database import init_db
 from app.api.routes import agents, agents_search, health
@@ -29,6 +30,14 @@ app = FastAPI(
     description="AI Agent Registry (Google A2A compatible)",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Register routers per API_Contract.md

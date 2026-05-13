@@ -1,4 +1,4 @@
-name: AgentMesh Backend CI
+name: AgentMesh CI
 
 on:
   push:
@@ -36,4 +36,33 @@ jobs:
       - name: Generate coverage report
         run: |
           pytest --cov=app --cov-report=term --cov-report=xml
+        continue-on-error: true
+
+  frontend-tests:
+    name: Frontend unit tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: Frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend unit tests
+        run: npm test -- --run
+
+      - name: Generate coverage report
+        run: npm test -- --run --coverage
         continue-on-error: true

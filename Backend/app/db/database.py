@@ -28,7 +28,9 @@ def init_db():
                 latency_ms INTEGER,
                 last_seen TEXT,
                 approved INTEGER NOT NULL DEFAULT 0,
-                deregistered INTEGER NOT NULL DEFAULT 0
+                deregistered INTEGER NOT NULL DEFAULT 0,
+                domain TEXT,
+                company TEXT
             )
         ''')
 
@@ -39,6 +41,10 @@ def init_db():
             cursor.execute("ALTER TABLE agents ADD COLUMN approved INTEGER NOT NULL DEFAULT 0")
         if "deregistered" not in columns:
             cursor.execute("ALTER TABLE agents ADD COLUMN deregistered INTEGER NOT NULL DEFAULT 0")
+        if "domain" not in columns:
+            cursor.execute("ALTER TABLE agents ADD COLUMN domain TEXT")
+        if "company" not in columns:
+            cursor.execute("ALTER TABLE agents ADD COLUMN company TEXT")
 
         conn.commit()
 

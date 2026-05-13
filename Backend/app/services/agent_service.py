@@ -116,6 +116,8 @@ def register_agent(
         "last_seen": None,
         "approved": 0,
         "deregistered": 0,
+        "domain": agent_card.get("domain", ""),
+        "company": agent_card.get("company", ""),
     }
     
     # Store in database
@@ -163,7 +165,9 @@ def store_agent(agent_data: Dict[str, Any]) -> None:
                     latency_ms = ?,
                     last_seen = ?,
                     approved = ?,
-                    deregistered = ?
+                    deregistered = ?,
+                    domain = ?,
+                    company = ?
                 WHERE id = ?
             ''', (
                 agent_data["name"],
@@ -177,14 +181,16 @@ def store_agent(agent_data: Dict[str, Any]) -> None:
                 agent_data["last_seen"],
                 updated_approved,
                 updated_deregistered,
+                agent_data.get("domain", ""),
+                agent_data.get("company", ""),
                 agent_data["id"]
             ))
         else:
             # Insert new agent
             cursor.execute('''
                 INSERT INTO agents
-                (id, name, description, url, version, capabilities, raw_agent_card, status, latency_ms, last_seen, approved, deregistered)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, name, description, url, version, capabilities, raw_agent_card, status, latency_ms, last_seen, approved, deregistered, domain, company)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 agent_data["id"],
                 agent_data["name"],
@@ -197,7 +203,9 @@ def store_agent(agent_data: Dict[str, Any]) -> None:
                 agent_data["latency_ms"],
                 agent_data["last_seen"],
                 agent_data.get("approved", 0),
-                agent_data.get("deregistered", 0)
+                agent_data.get("deregistered", 0),
+                agent_data.get("domain", ""),
+                agent_data.get("company", "")
             ))
         
         conn.commit()
@@ -272,6 +280,8 @@ def refresh_agent(agent_id: str) -> Dict[str, Any]:
         "latency_ms": agent.get("latency_ms"),  # Preserve latency
         "last_seen": agent.get("last_seen"),  # Preserve last_seen
         "approved": agent.get("approved", 0),
+        "domain": updated_agent_card.get("domain", agent.get("domain", "")),
+        "company": updated_agent_card.get("company", agent.get("company", "")),
     }
     
     # Update agent in database

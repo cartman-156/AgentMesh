@@ -5,18 +5,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 COMPOSE_FILE="$ROOT_DIR/docker-compose.yml"
-SERVICE_NAME="backend"
+SERVICE_NAME="frontend"
 
 usage() {
   cat <<EOF
 Usage: $(basename "$0") <command>
 
 Commands:
-  start     Build and start the backend Docker service
-  stop      Stop the backend Docker service
-  restart   Stop and start the backend Docker service
+  start     Build and start the frontend Docker service
+  stop      Stop the frontend Docker service
+  restart   Stop and start the frontend Docker service
   status    Show service status
-  logs      Tail backend service logs
+  logs      Tail frontend service logs
   help      Show this message
 EOF
 }
