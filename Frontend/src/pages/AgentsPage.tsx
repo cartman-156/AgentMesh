@@ -140,7 +140,7 @@ const AgentsPage = () => {
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {filteredAgents.length === 0 ? (
-            <p>No agents found for the selected status.</p>
+            <p>No agents found.</p>
           ) : (
             filteredAgents.map((agent) => (
               <AgentCard

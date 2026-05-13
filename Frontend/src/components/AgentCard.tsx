@@ -44,7 +44,8 @@ const AgentCard = ({ agent, isActionLoading, onApprove, onReject, onDeregister }
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>{agent.name}</h2>
-          <p style={{ margin: '0.5rem 0 0', color: '#6b7280' }}>{agent.id}</p>
+          <p style={{ margin: '0.5rem 0 0', color: '#6b7280' }}>{agent.description}</p>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#9ca3af' }}>ID: {agent.id}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <span style={{ borderRadius: '9999px', padding: '0.45rem 0.85rem', fontWeight: 600, fontSize: '0.85rem', ...badgeStyles[lifecycleStatus] }}>{lifecycleStatus}</span>
