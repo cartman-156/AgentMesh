@@ -89,6 +89,21 @@ class TestAgentSearch:
         
         assert len(result["results"]) >= 1
 
+    def test_search_by_description_partial(self, sample_agents):
+        """Test searching by description."""
+        result = search_agents(description="weather forecast")
+        
+        assert len(result["results"]) >= 1
+        assert any("weather" in a["description"].lower() for a in result["results"])
+
+    def test_search_by_skills_partial(self, sample_agents):
+        """Test searching by skills."""
+        # The sample_agent_card has skills: ["forecasting", "alerts"]
+        result = search_agents(skills="forecast")
+        
+        assert len(result["results"]) >= 1
+        # Skill match logic checks the skills array in json_data
+
     def test_search_multiple_filters_and_semantics(self, sample_agents):
         """Test AND semantics with multiple filters."""
         agent_id, _ = sample_agents
@@ -122,6 +137,9 @@ class TestAgentSearch:
             agent_id="test",
             name="weather",
             capability="weather",
+            description="desc",
+            skills="skill",
+            only_approved=True,
             match="exact"
         )
         
@@ -130,6 +148,9 @@ class TestAgentSearch:
         assert query["agent_id"] == "test"
         assert query["name"] == "weather"
         assert query["capability"] == "weather"
+        assert query["description"] == "desc"
+        assert query["skills"] == "skill"
+        assert query["only_approved"] is True
         assert query["match"] == "exact"
 
     def test_search_default_match_is_partial(self, sample_agents):
@@ -205,3 +226,21 @@ class TestSearchIntegration:
 
         result = search_agents(name="test-weather-agent", match="exact")
         assert len(result["results"]) == 0
+
+    def test_search_only_approved_filter(self, sample_agent_card):
+        """Test that only_approved filter strictly restricts results."""
+        # 1. Register but don't approve
+        register_agent(agent_card=sample_agent_card)
+        
+        # 2. Search without filter - should find it
+        res_all = search_agents(name="test-weather-agent")
+        assert len(res_all["results"]) == 1
+        
+        # 3. Search with only_approved=True - should NOT find it
+        res_approved = search_agents(name="test-weather-agent", only_approved=True)
+        assert len(res_approved["results"]) == 0
+        
+        # 4. Approve and search again - should find it
+        approve_agent("test-weather-agent")
+        res_after = search_agents(name="test-weather-agent", only_approved=True)
+        assert len(res_after["results"]) == 1

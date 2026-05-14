@@ -3,7 +3,6 @@ import AgentDetailPage from '../pages/AgentDetailPage';
 import AgentsPage from '../pages/AgentsPage';
 import DashboardPage from '../pages/DashboardPage';
 import DebugPage from '../pages/DebugPage';
-import HealthPage from '../pages/HealthPage';
 import SearchPage from '../pages/SearchPage';
 import PublicRoute from './PublicRoute';
 
@@ -38,14 +37,6 @@ const AppRoutes = () => (
       element={
         <PublicRoute>
           <SearchPage />
-        </PublicRoute>
-      }
-    />
-    <Route
-      path="/health"
-      element={
-        <PublicRoute>
-          <HealthPage />
         </PublicRoute>
       }
     />

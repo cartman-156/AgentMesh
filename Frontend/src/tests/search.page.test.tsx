@@ -36,55 +36,83 @@ describe('SearchPage', () => {
   });
 
   it('sends correct query to backend', async () => {
-    mockSearchAgents.mockResolvedValue({ query: { capability: 'weather', match: 'partial' }, results: [] });
+    mockSearchAgents.mockResolvedValue({ query: { name: 'weather', match: 'partial' }, results: [] });
 
     render(<SearchPage />);
 
-    const input = screen.getByPlaceholderText('Enter a capability name or keyword');
-    const button = screen.getByText('Search Capabilities');
+    const input = screen.getByPlaceholderText('Search by name...');
+    const button = screen.getByText('Search');
 
     fireEvent.change(input, { target: { value: 'weather' } });
     fireEvent.click(button);
 
     await waitFor(() => {
       expect(mockSearchAgents).toHaveBeenCalledWith({
-        capability: 'weather',
+        name: 'weather',
+        only_approved: false,
         match: 'partial',
       });
     });
   });
 
-  it('renders ranked results', async () => {
+  it('handles search type change', async () => {
+    mockSearchAgents.mockResolvedValue({ query: {}, results: [] });
+
+    render(<SearchPage />);
+
+    const select = screen.getByRole('combobox');
+    const input = screen.getByPlaceholderText('Search by name...');
+    
+    fireEvent.change(select, { target: { value: 'capability' } });
+    
+    // Placeholder should change
+    expect(screen.getByPlaceholderText('Search by capability...')).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: 'weather' } });
+    fireEvent.click(screen.getByText('Search'));
+
+    await waitFor(() => {
+      expect(mockSearchAgents).toHaveBeenCalledWith({
+        capability: 'weather',
+        only_approved: false,
+        match: 'partial',
+      });
+    });
+  });
+
+  it('handles only approved toggle', async () => {
+    mockSearchAgents.mockResolvedValue({ query: {}, results: [] });
+
+    render(<SearchPage />);
+
+    const checkbox = screen.getByLabelText('Only Approved');
+    const input = screen.getByPlaceholderText('Search by name...');
+
+    fireEvent.click(checkbox);
+    fireEvent.change(input, { target: { value: 'weather' } });
+    fireEvent.click(screen.getByText('Search'));
+
+    await waitFor(() => {
+      expect(mockSearchAgents).toHaveBeenCalledWith({
+        name: 'weather',
+        only_approved: true,
+        match: 'partial',
+      });
+    });
+  });
+
+  it('renders results using AgentCard', async () => {
     mockSearchAgents.mockResolvedValue({ query: {}, results: mockResults });
 
     render(<SearchPage />);
 
-    const input = screen.getByPlaceholderText('Enter a capability name or keyword');
-    const button = screen.getByText('Search Capabilities');
-
+    const input = screen.getByPlaceholderText('Search by name...');
     fireEvent.change(input, { target: { value: 'weather' } });
-    fireEvent.click(button);
+    fireEvent.click(screen.getByText('Search'));
 
     await waitFor(() => {
       expect(screen.getByText('Weather Agent')).toBeInTheDocument();
       expect(screen.getByText('Weather Bot')).toBeInTheDocument();
-    });
-  });
-
-  it('displays match reason if provided', async () => {
-    mockSearchAgents.mockResolvedValue({ query: {}, results: mockResults });
-
-    render(<SearchPage />);
-
-    const input = screen.getByPlaceholderText('Enter a capability name or keyword');
-    const button = screen.getByText('Search Capabilities');
-
-    fireEvent.change(input, { target: { value: 'weather' } });
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByText('capability partial match weather')).toBeInTheDocument();
-      expect(screen.getByText('name partial match weather')).toBeInTheDocument();
     });
   });
 
@@ -93,47 +121,24 @@ describe('SearchPage', () => {
 
     render(<SearchPage />);
 
-    const input = screen.getByPlaceholderText('Enter a capability name or keyword');
-    const button = screen.getByText('Search Capabilities');
-
+    const input = screen.getByPlaceholderText('Search by name...');
     fireEvent.change(input, { target: { value: 'nonexistent' } });
-    fireEvent.click(button);
+    fireEvent.click(screen.getByText('Search'));
 
     await waitFor(() => {
-      expect(screen.getByText('No agent matches found yet. Enter a capability and submit the form.')).toBeInTheDocument();
+      expect(screen.getByText('No agents matched your criteria.')).toBeInTheDocument();
     });
   });
 
   it('handles loading state', async () => {
-    mockSearchAgents.mockImplementation(() => new Promise<SearchAgentsResponse>(() => {})); // Never resolves
+    mockSearchAgents.mockImplementation(() => new Promise<SearchAgentsResponse>(() => {})); 
 
     render(<SearchPage />);
 
-    const input = screen.getByPlaceholderText('Enter a capability name or keyword');
-    const button = screen.getByText('Search Capabilities');
-
+    const input = screen.getByPlaceholderText('Search by name...');
     fireEvent.change(input, { target: { value: 'weather' } });
-    fireEvent.click(button);
+    fireEvent.click(screen.getByText('Search'));
 
-    expect(screen.getByText('Searching…')).toBeInTheDocument();
-  });
-
-  // Contract compliance
-  it('uses API response as-is without transformation', async () => {
-    const rawResult = { ...mockResults[0] };
-    mockSearchAgents.mockResolvedValue({ query: {}, results: [rawResult] });
-
-    render(<SearchPage />);
-
-    const input = screen.getByPlaceholderText('Enter a capability name or keyword');
-    const button = screen.getByText('Search Capabilities');
-
-    fireEvent.change(input, { target: { value: 'weather' } });
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByText(rawResult.name!)).toBeInTheDocument();
-      expect(screen.getByText(rawResult.match_reasons![0])).toBeInTheDocument();
-    });
+    expect(screen.getByText('Searching registry...')).toBeInTheDocument();
   });
 });

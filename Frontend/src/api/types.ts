@@ -1,3 +1,9 @@
+export interface Provider {
+  name: string;
+  website: string;
+  contact_email: string;
+}
+
 export type AgentLifecycleStatus =
   | 'registered'
   | 'approved'
@@ -13,6 +19,7 @@ export interface AgentModel {
   url: string;
   version: string;
   capabilities: string;
+  skills: string;
   raw_agent_card: string;
   status: string;
   latency_ms: number | null;
@@ -21,6 +28,7 @@ export interface AgentModel {
   deregistered: number;
   domain?: string;
   company?: string;
+  provider?: Provider;
 }
 
 export interface RegisterAgentRequest {
@@ -66,6 +74,9 @@ export interface SearchAgentsQuery {
   agent_id?: string;
   name?: string;
   capability?: string;
+  description?: string;
+  skills?: string;
+  only_approved?: boolean;
   match?: 'exact' | 'partial';
 }
 

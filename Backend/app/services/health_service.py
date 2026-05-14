@@ -3,18 +3,12 @@ import requests
 import time
 from typing import Optional, Dict, Any
 from datetime import datetime
-from app.db.database import get_db_connection
+from app.db import database
 
 
 def check_agent_health(agent_id: str, agent_url: str) -> Dict[str, Any]:
     """
     Check the health of a single agent.
-    
-    Parameters:
-    - agent_id: Agent identifier
-    - agent_url: Agent URL
-    
-    Returns: { status, latency_ms, last_checked }
     """
     start_time = time.time()
     status = "unhealthy"
@@ -52,59 +46,42 @@ def update_agent_health_status(
     """
     Update agent health status in database.
     """
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            UPDATE agents SET
-                status = ?,
-                latency_ms = ?,
-                last_seen = ?
-            WHERE id = ?
-        ''', (status, latency_ms, last_checked, agent_id))
-        conn.commit()
+    database.set_agent_health(
+        agent_id=agent_id,
+        health=status,
+        latency_ms=latency_ms,
+        last_checked=last_checked
+    )
 
 
 def get_agent_health(agent_id: str) -> Optional[Dict[str, Any]]:
     """
     Get health information for a specific agent.
-    
-    Returns: { status, latency_ms, last_checked }
     """
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT status, latency_ms, last_seen FROM agents WHERE id = ?",
-            (agent_id,)
-        )
-        row = cursor.fetchone()
-        
-        if not row:
-            return None
-        
-        return {
-            "status": row[0],
-            "latency_ms": row[1],
-            "last_checked": row[2]
-        }
+    row = database.get_agent_by_id(agent_id)
+    
+    if not row:
+        return None
+    
+    return {
+        "status": row.get("health"),
+        "latency_ms": row.get("latency_ms"),
+        "last_checked": row.get("last_checked")
+    }
 
 
 def get_system_health() -> Dict[str, Any]:
     """
     Get system-wide health metrics.
-    
-    Returns: { agents_total, healthy, unhealthy, avg_latency_ms }
     """
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT status, latency_ms FROM agents")
-        rows = cursor.fetchall()
+    rows = database.get_all_agents_raw()
     
     agents_total = len(rows)
-    healthy = sum(1 for row in rows if row[0] == "healthy")
+    healthy = sum(1 for row in rows if row.get("health") == "healthy")
     unhealthy = agents_total - healthy
     
     # Calculate average latency (excluding None values)
-    latencies = [row[1] for row in rows if row[1] is not None]
+    latencies = [row.get("latency_ms") for row in rows if row.get("latency_ms") is not None]
     avg_latency_ms = int(sum(latencies) / len(latencies)) if latencies else 0
     
     return {

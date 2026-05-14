@@ -86,10 +86,24 @@ export const HealthIcon = ({ className }: IconProps) => (
 
 export const DebugIcon = ({ className }: IconProps) => (
   <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6 9l6-6 6 6" />
-    <path d="M9 9v10" />
-    <path d="M15 9v10" />
-    <path d="M12 19v2" />
-    <path d="M3 15h18" />
+    <rect x="2" y="3" width="20" height="14" rx="2" />
+    <path d="M8 21h8" />
+    <path d="M12 17v4" />
+    <circle cx="16" cy="11" r="4" />
+    <path d="M19 14l3 3" />
+    <path d="M15 10l2 2" />
+    <path d="M17 10l-2 2" />
+  </svg>
+);
+
+export const LogoIcon = ({ className }: IconProps) => (
+  <svg className={className} width="32" height="32" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M32 96 L32 32 L64 72 L96 32 L96 96" stroke="var(--accent)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M32 32 L64 72 L96 32" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+    <circle cx="32" cy="32" r="7" fill="var(--accent)"/>
+    <circle cx="32" cy="96" r="7" fill="var(--accent)"/>
+    <circle cx="64" cy="72" r="8" fill="var(--text-primary)"/>
+    <circle cx="96" cy="32" r="7" fill="var(--accent)"/>
+    <circle cx="96" cy="96" r="7" fill="var(--accent)"/>
   </svg>
 );

@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   SunIcon,
@@ -8,6 +8,7 @@ import {
   SearchIcon,
   HealthIcon,
   DebugIcon,
+  LogoIcon,
 } from '../utils/icons';
 
 type NavItem = {
@@ -20,7 +21,6 @@ const navItems: NavItem[] = [
   { path: '/', label: 'Dashboard', icon: DashboardIcon },
   { path: '/agents', label: 'Registry', icon: RegistryIcon },
   { path: '/search', label: 'Search', icon: SearchIcon },
-  { path: '/health', label: 'System Health', icon: HealthIcon },
   { path: '/debug', label: 'Debug', icon: DebugIcon },
 ];
 
@@ -44,7 +44,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
     <div className="app-shell">
       <header className="main-header">
         <div className="main-header__content">
-          <h1 className="main-header__title">AgentMesh</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <LogoIcon />
+            <h1 className="main-header__title">AgentMesh</h1>
+          </div>
           <button
             type="button"
             className="mode-switch"

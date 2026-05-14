@@ -128,7 +128,13 @@ const RegisterAgentModal = ({ onClose, onRegisterSuccess }: RegisterAgentModalPr
   "version": "1.0",
   "domain": "finance",
   "company": "Acme Corp",
-  "capabilities": ["weather", "forecast"]
+  "capabilities": {
+    "streaming": true,
+    "multi_turn_conversation": true,
+    "tool_use": true,
+    "memory": false,
+    "async_execution": true
+  }
 }'
                  style={{
                       fontFamily: '"Fira code", "Fira Mono", monospace',

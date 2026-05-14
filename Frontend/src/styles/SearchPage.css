@@ -1,213 +1,122 @@
 .search-page__header {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .search-page__title {
-  margin: 0;
-  font-size: 2rem;
-  color: var(--text-primary);
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .search-page__copy {
-  margin: 0.5rem 0 0;
   color: var(--text-muted);
+  font-size: 1.1rem;
 }
 
-.search-page__form {
-  display: grid;
-  gap: 1.5rem;
-  max-width: 600px;
-  margin-bottom: 2rem;
+.search-page__bar-container {
+  margin-bottom: 3rem;
 }
 
-.search-page__field {
-  display: grid;
-  gap: 0.5rem;
+.search-page__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  padding: 0.5rem 0.5rem 0.5rem 1.25rem;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.search-page__label {
-  font-weight: 600;
-  color: var(--text-secondary);
+.search-page__bar:focus-within {
+  border-color: var(--accent-soft);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.search-page__input-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.search-page__search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 .search-page__input {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  background: var(--surface);
-  color: var(--text-primary);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.search-page__input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-.search-page__fieldset {
-  border: 1px solid var(--border);
-  padding: 1rem;
-  border-radius: 0.75rem;
-  background: var(--surface);
-}
-
-.search-page__legend {
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.search-page__radio-group {
-  display: flex;
-  gap: 1.5rem;
-  margin-top: 0.75rem;
-}
-
-.search-page__radio-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-.search-page__button {
-  padding: 0.75rem 1.25rem;
+  flex: 1;
+  background: transparent;
   border: none;
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  font-weight: 600;
-  background: var(--accent);
-  color: #ffffff;
-  cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.search-page__button:hover:not(:disabled) {
-  transform: translateY(-2px);
-}
-
-.search-page__button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.search-page__section {
-  margin-top: 2rem;
-}
-
-.search-page__section-title {
-  margin: 0 0 1rem;
-  font-size: 1.25rem;
+  padding: 0.75rem 0;
   color: var(--text-primary);
+  font-size: 1.05rem;
+  outline: none;
 }
 
-.search-page__query-pre {
-  background: var(--surface-soft);
-  padding: 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border);
-  overflow-x: auto;
-  font-size: 0.85rem;
-  color: var(--text-primary);
-}
-
-.search-page__results {
-  display: grid;
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-.search-page__result-card {
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  background: var(--surface);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.search-page__result-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
-}
-
-.search-page__result-header {
+.search-page__filters {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding-left: 1rem;
 }
 
-.search-page__result-title {
-  margin: 0 0 0.5rem;
-  font-size: 1.25rem;
-  color: var(--text-primary);
-}
-
-.search-page__result-id {
-  margin: 0;
+.search-page__select {
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  border-radius: 50px;
+  padding: 0.6rem 1.25rem;
   color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
 }
 
-.search-page__result-status {
-  text-align: right;
+.search-page__select:hover {
+  background: var(--background);
+  border-color: var(--border);
+}
+
+.search-page__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 0.5rem;
+}
+
+.search-page__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   font-size: 0.9rem;
   color: var(--text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 0.6rem 1.25rem;
+  border-radius: 50px;
+  transition: background 0.2s;
 }
 
-.search-page__result-description {
-  margin: 1rem 0 0;
-  color: var(--text-secondary);
+.search-page__checkbox-label:hover {
+  background: var(--surface-soft);
 }
 
-.search-page__result-meta {
+.search-page__status {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 4rem 0;
+  font-style: italic;
+}
+
+.search-page__grid {
   display: grid;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.search-page__result-meta-item dt {
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.search-page__result-meta-item dd {
-  margin: 0;
-  color: var(--text-secondary);
-}
-
-.search-page__result-meta-item a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.search-page__result-meta-item a:hover {
-  text-decoration: underline;
-}
-
-.search-page__match-reason {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: var(--accent-soft);
-  border-radius: 0.75rem;
-  border-left: 3px solid var(--accent);
-}
-
-.search-page__match-reason-title {
-  font-weight: 600;
-  color: var(--accent);
-  margin: 0;
-}
-
-.search-page__match-reason-list {
-  margin: 0.75rem 0 0;
-  padding-left: 1.5rem;
-  color: var(--text-secondary);
-}
-
-.search-page__match-reason-list li {
-  margin-bottom: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
 }

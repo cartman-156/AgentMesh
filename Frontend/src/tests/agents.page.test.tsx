@@ -20,6 +20,7 @@ const mockAgents: AgentModel[] = [
     url: 'http://weather.com',
     version: '1.0',
     capabilities: '{"canonical_capabilities": ["weather"]}',
+    skills: '[]',
     raw_agent_card: '{}',
     status: 'healthy',
     latency_ms: 100,
@@ -34,6 +35,7 @@ const mockAgents: AgentModel[] = [
     url: 'http://finance.com',
     version: '1.0',
     capabilities: '{"canonical_capabilities": ["finance"]}',
+    skills: '[]',
     raw_agent_card: '{}',
     status: 'unhealthy',
     latency_ms: null,
@@ -76,8 +78,8 @@ describe('AgentsPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('approved')).toBeInTheDocument();
-      expect(screen.getByText('registered')).toBeInTheDocument();
+      expect(screen.getByText('Approved')).toBeInTheDocument();
+      expect(screen.getByText('Registered')).toBeInTheDocument();
     });
   });
 

@@ -259,7 +259,7 @@ const AgentDetailPage = () => {
 
           <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Metadata</h3>
+              <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Agent Information</h3>
               <dl style={{ display: 'grid', gap: '0.75rem', margin: 0 }}>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
                   <dt style={{ color: 'var(--text-muted)' }}>URL</dt>

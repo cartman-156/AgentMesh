@@ -25,9 +25,10 @@ const AgentsPage = () => {
     try {
       setLoading(true);
       const result = await listAgents();
-      setAgents(result.agents);
+      setAgents(Array.isArray(result?.agents) ? result.agents : []);
     } catch (err) {
       toast.error('Unable to load agents.');
+      setAgents([]);
     } finally {
       setLoading(false);
     }
@@ -38,6 +39,8 @@ const AgentsPage = () => {
   }, []);
 
   const filteredAgents = useMemo(() => {
+    if (!Array.isArray(agents)) return [];
+    
     const filterStatus = (agent: AgentModel) => {
       if (statusFilter === 'all') return true;
       if (statusFilter === 'registered') return agent.approved === 0 && agent.deregistered === 0;
@@ -105,36 +108,109 @@ const AgentsPage = () => {
     setSelectedAgentId(null);
   };
 
+  const handleDownloadSample = () => {
+    const sampleAgent = {
+      "id": "agent-7f3c9a21-demo",
+      "name": "ContextAwareAssistant",
+      "description": "A general-purpose AI agent capable of reasoning, tool use, and multi-step task execution across domains.",
+      "version": "0.1.0",
+      "status": "active",
+      "company": "Demo AI Systems",
+      "url": "https://example.ai/agents/context-aware-assistant",
+      "provider": {
+        "name": "Demo AI Systems",
+        "website": "https://example.ai",
+        "contact_email": "support@example.ai"
+      },
+      "endpoints": {
+        "base_url": "https://api.example.ai/agents/context-aware-assistant",
+        "a2a_message_endpoint": "/v1/messages",
+        "a2a_stream_endpoint": "/v1/stream",
+        "health_check": "/health"
+      },
+      "authentication": {
+        "type": "bearer_token",
+        "token_url": "https://auth.example.ai/oauth/token",
+        "scopes": ["agent.execute", "agent.read", "agent.stream"]
+      },
+      "capabilities": {
+        "streaming": true,
+        "multi_turn_conversation": true,
+        "tool_use": true,
+        "memory": false,
+        "async_execution": true
+      },
+      "skills": [
+        {
+          "name": "reasoning",
+          "description": "Multi-step logical reasoning and planning",
+          "tags": ["planning", "analysis", "decision-making"]
+        },
+        {
+          "name": "code_generation",
+          "description": "Generates and explains code in multiple languages",
+          "tags": ["python", "javascript", "backend", "frontend"]
+        },
+        {
+          "name": "data_analysis",
+          "description": "Performs structured data interpretation and summarization",
+          "tags": ["csv", "json", "analytics"]
+        }
+      ]
+    };
+
+    const blob = new Blob([JSON.stringify(sampleAgent, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'sample-agent.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <main className="page-shell">
       <header className="agents-page__header">
-        <div className="agents-page__header-row">
+        <div className="agents-page__action-row">
+          <button
+            type="button"
+            onClick={handleDownloadSample}
+            className="btn btn--outline"
+          >
+            Download Sample
+          </button>
+          <button
+            type="button"
+            onClick={openRegisterModal}
+            className="btn btn-primary agents-page__register-button"
+          >
+            Register Agent
+          </button>
+        </div>
+        
+        <div className="agents-page__info-row">
           <div>
             <h1 className="agents-page__title">Agents</h1>
             <p className="agents-page__copy">
               A registry view of agents with lifecycle actions and status information.
             </p>
           </div>
-          <div className="agents-page__header-controls">
-            <div className="agents-page__filters">
-              {(['all', 'registered', 'approved', 'deregistered'] as const).map((status) => (
-                <button
-                  key={status}
-                  type="button"
-                  onClick={() => setStatusFilter(status)}
-                  className={`filter-button ${statusFilter === status ? 'filter-button--active' : ''}`}
-                >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={openRegisterModal}
-              className="btn btn-primary agents-page__register-button"
-            >
-              Register Agent
-            </button>
+        </div>
+
+        <div className="agents-page__filter-row">
+          <div className="agents-page__filters">
+            {(['all', 'registered', 'approved', 'deregistered'] as const).map((status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => setStatusFilter(status)}
+                className={`filter-button ${statusFilter === status ? 'filter-button--active' : ''}`}
+              >
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </button>
+            ))}
           </div>
         </div>
       </header>
