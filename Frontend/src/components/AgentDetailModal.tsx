@@ -3,7 +3,6 @@ import "prismjs/components/prism-json";
 import "prismjs/themes/prism.css";
 import type { CSSProperties } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import "react-confirm-alert/src/react-confirm-alert.css";
 import toast from 'react-hot-toast';
 import Editor from 'react-simple-code-editor';
 import {
@@ -140,7 +139,7 @@ const AgentDetailModal = ({ agentId, onClose, onActionComplete }: any) => {
   const handleReject = async () => {
     if (!agentId) return;
 
-    const confirmed = window.confirm('Rejecting this agent will prevent it from being used. Continue?');
+    const confirmed = window.confirm('Rejecting this agent will permanently remove it from the registry. Continue?');
     if (!confirmed) return;
 
     setActionLoading(true);
