@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom';
-import type { CSSProperties } from 'react';
 import type { AgentModel } from '../api/types';
+import './AgentCard.css';
 
 export type AgentCardProps = {
   agent: AgentModel;
@@ -8,15 +7,42 @@ export type AgentCardProps = {
   onApprove: (agentId: string) => void;
   onReject: (agentId: string) => void;
   onDeregister: (agentId: string) => void;
+  onView: (agentId: string) => void;
 };
 
-const badgeStyles: Record<string, CSSProperties> = {
-  registered: { backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' },
-  approved: { backgroundColor: '#ecfdf5', color: '#166534', border: '1px solid #a7f3d0' },
-  deregistered: { backgroundColor: '#f5f3f7', color: '#581c87', border: '1px solid #ddd6fe' },
-  healthy: { backgroundColor: '#ecfdf5', color: '#166534', border: '1px solid #a7f3d0' },
-  unhealthy: { backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' },
+type IconProps = {
+  className?: string;
 };
+
+const EyeIcon = ({ className }: IconProps) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const CheckIcon = ({ className }: IconProps) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+);
+
+const CloseIcon = ({ className }: IconProps) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 6 6 18" />
+    <path d="M6 6l12 12" />
+  </svg>
+);
+
+const TrashIcon = ({ className }: IconProps) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18" />
+    <path d="M8 6V4h8v2" />
+    <path d="M19 6 17.5 20H6.5L5 6" />
+    <path d="M10 11v6" />
+    <path d="M14 11v6" />
+  </svg>
+);
 
 const getLifecycleStatus = (agent: AgentModel) => {
   if (agent.deregistered === 1) return 'deregistered';
@@ -35,76 +61,72 @@ const getCanonicalCapabilities = (agent: AgentModel) => {
   }
 };
 
-const AgentCard = ({ agent, isActionLoading, onApprove, onReject, onDeregister }: AgentCardProps) => {
+const AgentCard = ({
+  agent,
+  isActionLoading,
+  onApprove,
+  onReject,
+  onDeregister,
+  onView,
+}: AgentCardProps) => {
   const lifecycleStatus = getLifecycleStatus(agent);
   const canonicalCapabilities = getCanonicalCapabilities(agent);
+  const statusClass = `badge badge-${lifecycleStatus}`;
 
   return (
-    <article style={{ borderRadius: '1rem', border: '1px solid #e5e7eb', padding: '1.25rem', backgroundColor: '#ffffff', display: 'grid', gap: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+    <article className="card agent-card">
+      <div className="agent-card__header">
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>{agent.name}</h2>
-          <p style={{ margin: '0.5rem 0 0', color: '#6b7280' }}>{agent.description}</p>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#9ca3af' }}>ID: {agent.id}</p>
+          <h2 className="agent-card__title">{agent.name}</h2>
+          <p className="agent-card__description">{agent.description}</p>
+          <p className="agent-card__meta">ID: {agent.id}</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ borderRadius: '9999px', padding: '0.45rem 0.85rem', fontWeight: 600, fontSize: '0.85rem', ...badgeStyles[lifecycleStatus] }}>{lifecycleStatus}</span>
-          <Link
-            to={`/agents/${encodeURIComponent(agent.id)}`}
-            style={{
-              padding: '0.45rem 0.85rem',
-              borderRadius: '9999px',
-              border: '1px solid #d1d5db',
-              backgroundColor: '#f9fafb',
-              color: '#1f2937',
-              textDecoration: 'none',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-            }}
+        <div className="agent-card__status-row">
+          <span className={statusClass}>{lifecycleStatus}</span>
+          <button
+            type="button"
+            onClick={() => onView(agent.id)}
+            className="action-button action-button--secondary action-button--text"
+            title="View agent details"
+            aria-label="View agent details"
           >
-            View
-          </Link>
+            <EyeIcon className="action-button__icon" />
+          </button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+      <div className="agent-card__tags">
         {canonicalCapabilities.length > 0 ? (
           canonicalCapabilities.map((capability) => (
-            <span key={capability} style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.85rem' }}>
+            <span key={capability} className="tag">
               {capability}
             </span>
           ))
         ) : (
-          <span style={{ color: '#6b7280' }}>No canonical capabilities</span>
+          <span className="agent-card__meta">No canonical capabilities</span>
         )}
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
-        <div style={{ color: '#4b5563' }}>
+      <div className="agent-card__stats">
+        <div>
           <strong>Status:</strong> {agent.status}
         </div>
-        <div style={{ color: '#4b5563' }}>
+        <div>
           <strong>Latency:</strong> {agent.latency_ms !== null ? `${agent.latency_ms} ms` : 'N/A'}
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+      <div className="agent-card__actions">
         {lifecycleStatus === 'registered' && (
           <button
             type="button"
             onClick={() => onApprove(agent.id)}
             disabled={isActionLoading}
-            style={{
-              padding: '0.75rem 1rem',
-              borderRadius: '0.75rem',
-              border: '1px solid #2563eb',
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              cursor: isActionLoading ? 'not-allowed' : 'pointer',
-              opacity: isActionLoading ? 0.7 : 1,
-            }}
+            className="action-button action-button--approve"
+            title="Approve agent"
+            aria-label="Approve agent"
           >
-            Approve
+            <CheckIcon className="action-button__icon" />
           </button>
         )}
         {lifecycleStatus === 'registered' && (
@@ -112,34 +134,22 @@ const AgentCard = ({ agent, isActionLoading, onApprove, onReject, onDeregister }
             type="button"
             onClick={() => onReject(agent.id)}
             disabled={isActionLoading}
-            style={{
-              padding: '0.75rem 1rem',
-              borderRadius: '0.75rem',
-              border: '1px solid #ef4444',
-              backgroundColor: '#ef4444',
-              color: '#ffffff',
-              cursor: isActionLoading ? 'not-allowed' : 'pointer',
-              opacity: isActionLoading ? 0.7 : 1,
-            }}
+            className="action-button action-button--danger"
+            title="Reject agent"
+            aria-label="Reject agent"
           >
-            Reject
+            <CloseIcon className="action-button__icon" />
           </button>
         )}
         <button
           type="button"
           onClick={() => onDeregister(agent.id)}
           disabled={isActionLoading || lifecycleStatus === 'deregistered'}
-          style={{
-            padding: '0.75rem 1rem',
-            borderRadius: '0.75rem',
-            border: '1px solid #ef4444',
-            backgroundColor: lifecycleStatus === 'deregistered' ? '#fef2f2' : '#ef4444',
-            color: lifecycleStatus === 'deregistered' ? '#9b1c1c' : '#ffffff',
-            cursor: lifecycleStatus === 'deregistered' || isActionLoading ? 'not-allowed' : 'pointer',
-            opacity: lifecycleStatus === 'deregistered' ? 0.6 : 1,
-          }}
+          className={`action-button ${lifecycleStatus === 'deregistered' ? 'action-button--secondary' : 'action-button--deregister'}`}
+          title="Deregister agent"
+          aria-label="Deregister agent"
         >
-          {isActionLoading ? 'Processing…' : 'Deregister'}
+          <TrashIcon className="action-button__icon" />
         </button>
       </div>
     </article>

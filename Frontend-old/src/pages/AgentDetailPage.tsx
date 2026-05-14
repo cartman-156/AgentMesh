@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import {
   getAgent,
   getAgentHealth,
@@ -12,11 +11,11 @@ import {
 import type { AgentModel, AgentHealthResponse } from '../api/types';
 
 const badgeStyles: Record<string, CSSProperties> = {
-  registered: { backgroundColor: 'var(--surface-soft)', color: 'var(--accent)', border: '1px solid var(--border)' },
-  approved: { backgroundColor: 'var(--success-soft)', color: 'var(--success)', border: '1px solid rgba(74, 222, 128, 0.3)' },
-  deregistered: { backgroundColor: 'var(--danger-soft)', color: 'var(--danger)', border: '1px solid rgba(248, 113, 113, 0.3)' },
-  healthy: { backgroundColor: 'var(--success-soft)', color: 'var(--success)', border: '1px solid rgba(74, 222, 128, 0.3)' },
-  unhealthy: { backgroundColor: 'var(--warning-soft)', color: 'var(--warning)', border: '1px solid rgba(251, 191, 36, 0.3)' },
+  registered: { backgroundColor: '#f8fafc', color: '#0369a1', border: '1px solid #bae6fd' },
+  approved: { backgroundColor: '#ecfdf5', color: '#166534', border: '1px solid #a7f3d0' },
+  deregistered: { backgroundColor: '#fff1f2', color: '#991b1b', border: '1px solid #fecaca' },
+  healthy: { backgroundColor: '#ecfdf5', color: '#166534', border: '1px solid #a7f3d0' },
+  unhealthy: { backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' },
 };
 
 const renderBadge = (text: string, type: string) => (
@@ -43,6 +42,7 @@ const AgentDetailPage = () => {
   const [debugInfo, setDebugInfo] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const loadAgent = async () => {
@@ -55,6 +55,7 @@ const AgentDetailPage = () => {
     try {
       setLoading(true);
       setError(null);
+      setMessage(null);
       const [agentResponse, healthResponse] = await Promise.all([
         getAgent(id),
         getAgentHealth(id),
@@ -121,13 +122,14 @@ const AgentDetailPage = () => {
 
     setActionLoading(true);
     setError(null);
+    setMessage(null);
 
     try {
       const response = await approveAgent(id, { action: 'approve' });
-      toast.success(`Agent ${response.id} was approved successfully.`);
+      setMessage(`Agent ${response.id} was approved successfully.`);
       await loadAgent();
     } catch (err) {
-      toast.error('Approval failed. Please try again.');
+      setError('Approval failed. Please try again.');
     } finally {
       setActionLoading(false);
     }
@@ -141,15 +143,16 @@ const AgentDetailPage = () => {
 
     setActionLoading(true);
     setError(null);
+    setMessage(null);
 
     try {
       const response = await approveAgent(id, { action: 'reject' });
-      toast.success(`Agent ${response.id} was rejected successfully.`);
+      setMessage(`Agent ${response.id} was rejected successfully.`);
       setAgent(null);
       setHealth(null);
       setDebugInfo(null);
     } catch (err) {
-      toast.error('Rejection failed. Please try again.');
+      setError('Rejection failed. Please try again.');
     } finally {
       setActionLoading(false);
     }
@@ -163,23 +166,24 @@ const AgentDetailPage = () => {
 
     setActionLoading(true);
     setError(null);
+    setMessage(null);
 
     try {
       const response = await deregisterAgent(id);
-      toast.success(`Agent ${response.id} was deregistered successfully.`);
+      setMessage(`Agent ${response.id} was deregistered successfully.`);
       await loadAgent();
     } catch (err) {
-      toast.error('Deregistration failed. Please try again.');
+      setError('Deregistration failed. Please try again.');
     } finally {
       setActionLoading(false);
     }
   };
 
   return (
-    <main className="page-shell">
+    <main style={{ padding: '2rem', minHeight: '100vh', backgroundColor: '#f8fafc', fontFamily: 'Inter, system-ui, sans-serif' }}>
       <header style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ margin: 0, fontSize: '2rem', color: 'var(--text-primary)' }}>Agent Details</h1>
-        <p style={{ margin: '0.5rem 0 0', color: 'var(--text-muted)' }}>
+        <h1 style={{ margin: 0, fontSize: '2rem', color: '#111827' }}>Agent Details</h1>
+        <p style={{ margin: '0.5rem 0 0', color: '#6b7280' }}>
           Detailed metadata, lifecycle state, and debug diagnostics for the selected agent.
         </p>
         <div style={{ marginTop: '1rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -240,16 +244,22 @@ const AgentDetailPage = () => {
         </div>
       </header>
 
+      {message && (
+        <section style={{ marginBottom: '1rem', padding: '1rem', borderRadius: '1rem', backgroundColor: '#ecfdf5', color: '#166534', border: '1px solid #a7f3d0' }}>
+          {message}
+        </section>
+      )}
+
       {loading ? (
         <p>Loading agent details...</p>
-      ) : !agent ? (
-        <p>Unable to load agent details.</p>
+      ) : error ? (
+        <p style={{ color: '#dc2626' }}>{error}</p>
       ) : agent ? (
         <div style={{ display: 'grid', gap: '1.5rem' }}>
           <section style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text-primary)' }}>{agent.name}</h2>
-              <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)' }}>Agent ID: {agent.id}</p>
+              <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#111827' }}>{agent.name}</h2>
+              <p style={{ margin: '0.5rem 0 0', color: '#4b5563' }}>Agent ID: {agent.id}</p>
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
               {renderBadge(lifecycleStatus, lifecycleStatus)}
@@ -258,67 +268,67 @@ const AgentDetailPage = () => {
           </section>
 
           <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div className="card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Metadata</h3>
+            <div style={{ borderRadius: '1rem', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', padding: '1.5rem' }}>
+              <h3 style={{ marginBottom: '1rem', color: '#111827' }}>Metadata</h3>
               <dl style={{ display: 'grid', gap: '0.75rem', margin: 0 }}>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <dt style={{ color: 'var(--text-muted)' }}>URL</dt>
-                  <dd style={{ margin: 0, color: 'var(--text-primary)' }}>{agent.url || 'N/A'}</dd>
+                  <dt style={{ color: '#6b7280' }}>URL</dt>
+                  <dd style={{ margin: 0, color: '#111827' }}>{agent.url || 'N/A'}</dd>
                 </div>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <dt style={{ color: 'var(--text-muted)' }}>Version</dt>
-                  <dd style={{ margin: 0, color: 'var(--text-primary)' }}>{agent.version || 'N/A'}</dd>
+                  <dt style={{ color: '#6b7280' }}>Version</dt>
+                  <dd style={{ margin: 0, color: '#111827' }}>{agent.version || 'N/A'}</dd>
                 </div>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <dt style={{ color: 'var(--text-muted)' }}>Domain</dt>
-                  <dd style={{ margin: 0, color: 'var(--text-primary)' }}>{agent.domain || 'N/A'}</dd>
+                  <dt style={{ color: '#6b7280' }}>Domain</dt>
+                  <dd style={{ margin: 0, color: '#111827' }}>{agent.domain || 'N/A'}</dd>
                 </div>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <dt style={{ color: 'var(--text-muted)' }}>Company</dt>
-                  <dd style={{ margin: 0, color: 'var(--text-primary)' }}>{agent.company || 'N/A'}</dd>
+                  <dt style={{ color: '#6b7280' }}>Company</dt>
+                  <dd style={{ margin: 0, color: '#111827' }}>{agent.company || 'N/A'}</dd>
                 </div>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <dt style={{ color: 'var(--text-muted)' }}>Provider</dt>
-                  <dd style={{ margin: 0, color: 'var(--text-primary)' }}>{(rawAgentCard?.provider as string) ?? 'N/A'}</dd>
+                  <dt style={{ color: '#6b7280' }}>Provider</dt>
+                  <dd style={{ margin: 0, color: '#111827' }}>{(rawAgentCard?.provider as string) ?? 'N/A'}</dd>
                 </div>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <dt style={{ color: 'var(--text-muted)' }}>Lifecycle state</dt>
-                  <dd style={{ margin: 0, color: 'var(--text-primary)' }}>{lifecycleStatus}</dd>
+                  <dt style={{ color: '#6b7280' }}>Lifecycle state</dt>
+                  <dd style={{ margin: 0, color: '#111827' }}>{lifecycleStatus}</dd>
                 </div>
               </dl>
             </div>
 
-            <div className="card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Health</h3>
+            <div style={{ borderRadius: '1rem', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', padding: '1.5rem' }}>
+              <h3 style={{ marginBottom: '1rem', color: '#111827' }}>Health</h3>
               <dl style={{ display: 'grid', gap: '0.75rem', margin: 0 }}>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <dt style={{ color: 'var(--text-muted)' }}>Status</dt>
-                  <dd style={{ margin: 0, color: 'var(--text-primary)' }}>{health?.status ?? 'Unavailable'}</dd>
+                  <dt style={{ color: '#6b7280' }}>Status</dt>
+                  <dd style={{ margin: 0, color: '#111827' }}>{health?.status ?? 'Unavailable'}</dd>
                 </div>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <dt style={{ color: 'var(--text-muted)' }}>Latency</dt>
-                  <dd style={{ margin: 0, color: 'var(--text-primary)' }}>{health?.latency_ms != null ? `${health?.latency_ms} ms` : 'Unavailable'}</dd>
+                  <dt style={{ color: '#6b7280' }}>Latency</dt>
+                  <dd style={{ margin: 0, color: '#111827' }}>{health?.latency_ms != null ? `${health?.latency_ms} ms` : 'Unavailable'}</dd>
                 </div>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <dt style={{ color: 'var(--text-muted)' }}>Last checked</dt>
-                  <dd style={{ margin: 0, color: 'var(--text-primary)' }}>{health?.last_checked ?? 'Unavailable'}</dd>
+                  <dt style={{ color: '#6b7280' }}>Last checked</dt>
+                  <dd style={{ margin: 0, color: '#111827' }}>{health?.last_checked ?? 'Unavailable'}</dd>
                 </div>
               </dl>
             </div>
           </section>
 
           <section style={{ display: 'grid', gap: '1rem' }}>
-            <div className="card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Capabilities</h3>
+            <div style={{ borderRadius: '1rem', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', padding: '1.5rem' }}>
+              <h3 style={{ marginBottom: '1rem', color: '#111827' }}>Capabilities</h3>
               <div style={{ display: 'grid', gap: '0.5rem', marginBottom: '1rem' }}>
                 <div>
-                  <p style={{ margin: '0 0 0.5rem', color: 'var(--text-muted)', fontSize: '0.95rem' }}>Raw capabilities</p>
+                  <p style={{ margin: '0 0 0.5rem', color: '#6b7280', fontSize: '0.95rem' }}>Raw capabilities</p>
                   {capabilities.raw.length === 0 ? (
-                    <p style={{ margin: 0, color: 'var(--text-secondary)' }}>No raw capability data available.</p>
+                    <p style={{ margin: 0, color: '#4b5563' }}>No raw capability data available.</p>
                   ) : (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                       {capabilities.raw.map((capability) => (
-                        <span key={capability} style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)', padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.85rem' }}>
+                        <span key={capability} style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.85rem' }}>
                           {capability}
                         </span>
                       ))}
@@ -326,13 +336,13 @@ const AgentDetailPage = () => {
                   )}
                 </div>
                 <div>
-                  <p style={{ margin: '0 0 0.5rem', color: 'var(--text-muted)', fontSize: '0.95rem' }}>Canonical capabilities</p>
+                  <p style={{ margin: '0 0 0.5rem', color: '#6b7280', fontSize: '0.95rem' }}>Canonical capabilities</p>
                   {capabilities.canonical.length === 0 ? (
-                    <p style={{ margin: 0, color: 'var(--text-secondary)' }}>No canonical capability data available.</p>
+                    <p style={{ margin: 0, color: '#4b5563' }}>No canonical capability data available.</p>
                   ) : (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                       {capabilities.canonical.map((capability) => (
-                        <span key={capability} style={{ backgroundColor: 'var(--success-soft)', color: 'var(--success)', padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.85rem' }}>
+                        <span key={capability} style={{ backgroundColor: '#ecfdf5', color: '#166534', padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.85rem' }}>
                           {capability}
                         </span>
                       ))}
@@ -342,14 +352,14 @@ const AgentDetailPage = () => {
               </div>
             </div>
 
-            <div className="card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Debug information</h3>
+            <div style={{ borderRadius: '1rem', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', padding: '1.5rem' }}>
+              <h3 style={{ marginBottom: '1rem', color: '#111827' }}>Debug information</h3>
               {debugInfo ? (
-                <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.9rem', color: 'var(--text-primary)', margin: 0, maxHeight: '420px', overflowY: 'auto' }}>
+                <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.9rem', color: '#111827', margin: 0, maxHeight: '420px', overflowY: 'auto' }}>
                   {JSON.stringify(debugInfo, null, 2)}
                 </pre>
               ) : (
-                <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                <p style={{ margin: 0, color: '#4b5563' }}>
                   Debug details are not available for this agent or the debug API did not return additional information.
                 </p>
               )}

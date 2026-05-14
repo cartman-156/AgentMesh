@@ -1,5 +1,4 @@
 import { FormEvent, useState } from 'react';
-import toast from 'react-hot-toast';
 import {
   getDebugAgent,
   searchDebug,
@@ -22,15 +21,17 @@ const DebugPage = () => {
   const [searchParams, setSearchParams] = useState<SearchAgentsQuery>({});
   const [data, setData] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAgentInspection = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null);
     setLoading(true);
     try {
       const response = await getDebugAgent(agentId.trim());
       setData(response);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to fetch agent debug data.');
+      setError(err instanceof Error ? err.message : 'Failed to fetch agent debug data.');
     } finally {
       setLoading(false);
     }
@@ -38,12 +39,13 @@ const DebugPage = () => {
 
   const handleSearchTrace = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null);
     setLoading(true);
     try {
       const response = await searchDebug(searchParams);
       setData(response);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to fetch search debug data.');
+      setError(err instanceof Error ? err.message : 'Failed to fetch search debug data.');
     } finally {
       setLoading(false);
     }
@@ -51,24 +53,26 @@ const DebugPage = () => {
 
   const handleHealthHistory = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null);
     setLoading(true);
     try {
       const response = await getDebugAgentHealth(agentId.trim());
       setData(response);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to fetch health debug data.');
+      setError(err instanceof Error ? err.message : 'Failed to fetch health debug data.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSystemState = async () => {
+    setError(null);
     setLoading(true);
     try {
       const response = await getDebugState();
       setData(response);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to fetch system state.');
+      setError(err instanceof Error ? err.message : 'Failed to fetch system state.');
     } finally {
       setLoading(false);
     }
@@ -182,38 +186,44 @@ const DebugPage = () => {
   };
 
   return (
-    <main className="page-shell" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+    <main style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>Debug Viewer</h1>
       <p>Inspect agents, visualize search traces, review health history, and view system state.</p>
 
       <nav style={{ marginBottom: '24px' }}>
         <button
           onClick={() => setCurrentView('agent')}
-          style={{ marginRight: '12px', padding: '8px 16px', background: currentView === 'agent' ? 'var(--surface-soft)' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.75rem' }}
+          style={{ marginRight: '12px', padding: '8px 16px', background: currentView === 'agent' ? '#ddd' : '#f0f0f0' }}
         >
           Agent Inspection
         </button>
         <button
           onClick={() => setCurrentView('search')}
-          style={{ marginRight: '12px', padding: '8px 16px', background: currentView === 'search' ? 'var(--surface-soft)' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.75rem' }}
+          style={{ marginRight: '12px', padding: '8px 16px', background: currentView === 'search' ? '#ddd' : '#f0f0f0' }}
         >
           Search Trace
         </button>
         <button
           onClick={() => setCurrentView('health')}
-          style={{ marginRight: '12px', padding: '8px 16px', background: currentView === 'health' ? 'var(--surface-soft)' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.75rem' }}
+          style={{ marginRight: '12px', padding: '8px 16px', background: currentView === 'health' ? '#ddd' : '#f0f0f0' }}
         >
           Health History
         </button>
         <button
           onClick={() => setCurrentView('state')}
-          style={{ padding: '8px 16px', background: currentView === 'state' ? 'var(--surface-soft)' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.75rem' }}
+          style={{ padding: '8px 16px', background: currentView === 'state' ? '#ddd' : '#f0f0f0' }}
         >
           System State
         </button>
       </nav>
 
       {renderView()}
+
+      {error && (
+        <div style={{ marginTop: '18px', color: '#b00020' }}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
 
       {!!data && (
         <section style={{ marginTop: '24px' }}>

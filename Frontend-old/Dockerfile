@@ -6,13 +6,13 @@ ENV VITE_API_BASE=$VITE_API_BASE
 WORKDIR /app
 
 # Copy package files
-COPY Frontend-modified/package*.json ./
+COPY Frontend/package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy source code
-COPY Frontend-modified/. .
+COPY Frontend/. .
 
 # Build the application
 RUN npm run build

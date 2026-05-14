@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import toast from 'react-hot-toast';
 import { searchAgents } from '../api/agentApi';
 import type { SearchResult } from '../api/types';
 
@@ -8,11 +9,9 @@ const SearchPage = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [queryInfo, setQueryInfo] = useState<Record<string, unknown>>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
     setLoading(true);
 
     try {
@@ -24,7 +23,7 @@ const SearchPage = () => {
       setResults(response.results ?? []);
       setQueryInfo(response.query ?? {});
     } catch (fetchError) {
-      setError(
+      toast.error(
         fetchError instanceof Error
           ? fetchError.message
           : 'Failed to search agents.'
@@ -37,7 +36,7 @@ const SearchPage = () => {
   };
 
   return (
-    <main style={{ padding: '24px', maxWidth: '980px', margin: '0 auto' }}>
+    <main className="page-shell" style={{ maxWidth: '980px', margin: '0 auto' }}>
       <h1>Capability Search</h1>
       <p>Search registered agents by capability and review ranked match results.</p>
 
@@ -52,7 +51,7 @@ const SearchPage = () => {
           />
         </label>
 
-        <fieldset style={{ border: '1px solid #ddd', padding: '12px', borderRadius: '8px' }}>
+        <fieldset style={{ border: '1px solid var(--border)', padding: '12px', borderRadius: '8px', background: 'var(--surface)' }}>
           <legend>Match mode</legend>
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
             <input
@@ -79,22 +78,16 @@ const SearchPage = () => {
         <button
           type="submit"
           disabled={loading || capability.trim() === ''}
-          style={{ padding: '12px 18px', fontSize: '1rem', cursor: 'pointer' }}
+          style={{ padding: '12px 18px', fontSize: '1rem', cursor: 'pointer', borderRadius: '0.75rem', backgroundColor: 'var(--accent)', color: '#ffffff', border: '1px solid var(--accent)' }}
         >
           {loading ? 'Searching…' : 'Search Capabilities'}
         </button>
       </form>
 
-      {error && (
-        <div style={{ marginTop: '18px', color: '#b00020' }}>
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
       {Object.keys(queryInfo).length > 0 && (
         <section style={{ marginTop: '24px' }}>
           <h2>Search query</h2>
-          <pre style={{ background: '#f4f4f4', padding: '12px', borderRadius: '8px' }}>
+          <pre style={{ background: 'var(--surface-soft)', padding: '12px', borderRadius: '8px' }}>
             {JSON.stringify(queryInfo, null, 2)}
           </pre>
         </section>
@@ -118,10 +111,10 @@ const SearchPage = () => {
                 <article
                   key={`${id}-${index}`}
                   style={{
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--border)',
                     borderRadius: '12px',
                     padding: '18px',
-                    background: '#fff',
+                    background: 'var(--surface)',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>

@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { getSystemHealth, listAgents } from '../api';
 import type { AgentModel, SystemHealthResponse } from '../api/types';
 import MetricCard from '../components/MetricCard';
+import './DashboardPage.css';
 
 const parseCapabilityDistribution = (agents: AgentModel[]) => {
   const counts = new Map<string, number>();
@@ -32,7 +35,6 @@ const DashboardPage = () => {
   const [health, setHealth] = useState<SystemHealthResponse | null>(null);
   const [agents, setAgents] = useState<AgentModel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -46,7 +48,7 @@ const DashboardPage = () => {
         setHealth(healthResponse);
         setAgents(agentsResponse.agents);
       } catch (err) {
-        setError('Unable to load dashboard metrics.');
+        toast.error('Unable to load dashboard metrics.');
       } finally {
         setLoading(false);
       }
@@ -68,72 +70,141 @@ const DashboardPage = () => {
   ).length;
   const deregisteredCount = agents.filter((agent) => agent.deregistered === 1).length;
 
+  const capabilityChartData = capabilityDistribution.slice(0, 6).map((item) => ({
+    capability: item.capability,
+    count: item.count,
+  }));
+
+  const statusChartData = [
+    { name: 'Registered', value: registeredCount },
+    { name: 'Approved', value: approvedCount },
+    { name: 'Deregistered', value: deregisteredCount },
+  ];
+
+  const statusColors = ['#2563eb', '#16a34a', '#ef4444'];
+
   return (
-    <main style={{ padding: '2rem', fontFamily: 'Inter, system-ui, sans-serif', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
-      <header style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ margin: 0, fontSize: '2rem', color: '#111827' }}>Dashboard</h1>
-        <p style={{ margin: '0.5rem 0 0', color: '#6b7280' }}>
-          System health overview and capability distribution for the AgentMesh registry.
-        </p>
-      </header>
+    <main className="page-shell">
+      <div className="dashboard-page">
+        <header className="dashboard-page__header">
+          <div className="dashboard-page__title-section">
+            <h1 className="dashboard-page__title">Dashboard</h1>
+            <p className="dashboard-page__copy">System health overview and capability distribution for the AgentMesh registry.</p>
+          </div>
+        </header>
 
-      {loading ? (
-        <p>Loading dashboard data...</p>
-      ) : error ? (
-        <p style={{ color: '#b91c1c' }}>{error}</p>
-      ) : (
-        <>
-          <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-            <MetricCard label="Total agents" value={health?.agents_total ?? agents.length} />
-            <MetricCard label="Healthy agents" value={health?.healthy ?? 0} />
-            <MetricCard label="Unhealthy agents" value={health?.unhealthy ?? 0} />
-            <MetricCard label="Registered agents" value={registeredCount} />
-            <MetricCard label="Approved agents" value={approvedCount} />
-            <MetricCard label="Deregistered agents" value={deregisteredCount} />
-          </section>
+        {loading ? (
+          <p>Loading dashboard data...</p>
+        ) : (
+          <>
+            <section className="dashboard-page__metrics grid metrics-grid">
+              <MetricCard label="Total agents" value={health?.agents_total ?? agents.length} />
+              <MetricCard label="Healthy agents" value={health?.healthy ?? 0} />
+              <MetricCard label="Unhealthy agents" value={health?.unhealthy ?? 0} />
+              <MetricCard label="Registered agents" value={registeredCount} />
+              <MetricCard label="Approved agents" value={approvedCount} />
+              <MetricCard label="Deregistered agents" value={deregisteredCount} />
+            </section>
 
-          <section style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem' }}>
-            <div style={{ border: '1px solid #d1d5db', borderRadius: '0.75rem', padding: '1.5rem', backgroundColor: '#fff' }}>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>Capability Distribution</h2>
-              <p style={{ margin: '0.5rem 0 1rem', color: '#6b7280' }}>
-                Canonical capabilities found across registered agents.
-              </p>
-              {capabilityDistribution.length === 0 ? (
-                <p>No capability data available yet.</p>
-              ) : (
-                <ol style={{ paddingLeft: '1.25rem', margin: 0 }}>
-                  {capabilityDistribution.slice(0, 10).map((item) => (
-                    <li key={item.capability} style={{ marginBottom: '0.75rem', color: '#374151' }}>
-                      <strong>{item.capability}</strong> — {item.count} agent{item.count === 1 ? '' : 's'}
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
+            <section className="dashboard-page__analytics">
+              <div className="analytics-card">
+                <div className="analytics-card__header">
+                  <h2 className="analytics-card__title">Top Capabilities</h2>
+                  <p className="analytics-card__copy">The most common canonical capability tags across your active agents.</p>
+                </div>
+                <div className="chart-wrapper">
+                {capabilityChartData.length === 0 ? (
+                  <div className="analytics-no-data">No capability chart data available yet.</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={capabilityChartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(100,116,139,0.2)" />
+                      <XAxis dataKey="capability" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+                      <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+                      <Tooltip contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                      <Bar dataKey="count" fill="var(--accent)" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+              </div>
 
-            <div style={{ border: '1px solid #d1d5db', borderRadius: '0.75rem', padding: '1.5rem', backgroundColor: '#fff' }}>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>System-wide stats</h2>
-              <p style={{ margin: '0.5rem 0 1rem', color: '#6b7280' }}>
-                Summary metrics derived from backend health and registry data.
-              </p>
-              <dl style={{ display: 'grid', gap: '0.75rem', margin: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <dt style={{ color: '#4b5563' }}>Average latency</dt>
-                  <dd style={{ margin: 0, fontWeight: 700, color: '#111827' }}>{health?.avg_latency_ms ?? 'N/A'} ms</dd>
+              <div className="analytics-card">
+                <div className="analytics-card__header">
+                  <h2 className="analytics-card__title">Agent Status Share</h2>
+                  <p className="analytics-card__copy">Breakdown of registered, approved, and deregistered agents.</p>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <dt style={{ color: '#4b5563' }}>Capability categories</dt>
-                  <dd style={{ margin: 0, fontWeight: 700, color: '#111827' }}>{capabilityDistribution.length}</dd>
+                <div className="chart-wrapper">
+                  {statusChartData.every((entry) => entry.value === 0) ? (
+                    <div className="analytics-no-data">No status chart data available yet.</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={statusChartData}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius={50}
+                          outerRadius={80}
+                          paddingAngle={4}
+                          label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                        >
+                          {statusChartData.map((entry, index) => (
+                            <Cell key={`cell-${entry.name}`} fill={statusColors[index % statusColors.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
+                        <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: 'var(--text-secondary)' }}>{value}</span>} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <dt style={{ color: '#4b5563' }}>Agents with health data</dt>
-                  <dd style={{ margin: 0, fontWeight: 700, color: '#111827' }}>{agents.filter((agent) => agent.latency_ms !== null).length}</dd>
-                </div>
-              </dl>
-            </div>
-          </section>
-        </>
-      )}
+              </div>
+            </section>
+
+            <section className="dashboard-page__stats">
+              <div className="capability-section">
+                <h2 className="capability-section__title">Capability Distribution</h2>
+                <p className="capability-section__copy">
+                  Canonical capabilities found across registered agents.
+                </p>
+                {capabilityDistribution.length === 0 ? (
+                  <p>No capability data available yet.</p>
+                ) : (
+                  <ol className="capability-list">
+                    {capabilityDistribution.slice(0, 10).map((item) => (
+                      <li key={item.capability} className="capability-item">
+                        <span className="capability-item__name">{item.capability}</span> — {item.count} agent{item.count === 1 ? '' : 's'}
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </div>
+
+              <div className="stats-section">
+                <h2 className="stats-section__title">System-wide stats</h2>
+                <p className="stats-section__copy">
+                  Summary metrics derived from backend health and registry data.
+                </p>
+                <dl className="stats-list">
+                  <div className="stats-item">
+                    <dt className="stats-item__label">Average latency</dt>
+                    <dd className="stats-item__value">{health?.avg_latency_ms ?? 'N/A'} ms</dd>
+                  </div>
+                  <div className="stats-item">
+                    <dt className="stats-item__label">Capability categories</dt>
+                    <dd className="stats-item__value">{capabilityDistribution.length}</dd>
+                  </div>
+                  <div className="stats-item">
+                    <dt className="stats-item__label">Agents with health data</dt>
+                    <dd className="stats-item__value">{agents.filter((agent) => agent.latency_ms !== null).length}</dd>
+                  </div>
+                </dl>
+              </div>
+            </section>
+          </>
+        )}
+      </div>
     </main>
   );
 };
