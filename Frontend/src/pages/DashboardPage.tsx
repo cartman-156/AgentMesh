@@ -146,8 +146,8 @@ const DashboardPage = () => {
                           nameKey="name"
                           innerRadius={50}
                           outerRadius={80}
-                          paddingAngle={4}
-                          label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                          label={({ name, percent }) => percent && percent > 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ""}
+                          labelLine={({ percent }) => percent && percent > 0}
                         >
                           {statusChartData.map((entry, index) => (
                             <Cell key={`cell-${entry.name}`} fill={statusColors[index % statusColors.length]} />

@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useParams } from 'react-router-dom';
 import {
+  approveAgent,
+  deregisterAgent,
   getAgent,
   getAgentHealth,
   getDebugAgent,
-  approveAgent,
-  deregisterAgent,
 } from '../api';
-import type { AgentModel, AgentHealthResponse } from '../api/types';
+import type { AgentHealthResponse, AgentModel } from '../api/types';
 
 const badgeStyles: Record<string, CSSProperties> = {
   registered: { backgroundColor: 'var(--surface-soft)', color: 'var(--accent)', border: '1px solid var(--border)' },

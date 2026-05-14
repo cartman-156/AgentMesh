@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { listAgents, approveAgent, deregisterAgent } from '../api';
+import { approveAgent, deregisterAgent, listAgents } from '../api';
 import type { AgentModel } from '../api/types';
 import AgentCard from '../components/AgentCard';
 import AgentDetailModal from '../components/AgentDetailModal';
