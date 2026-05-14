@@ -22,3 +22,17 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+
+  rca-agent:
+    build:
+      context: ./NetworkRCAAgent
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - LLM_MODEL=${LLM_MODEL:-gemini/gemini-2.0-flash}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OLLAMA_API_BASE=${OLLAMA_API_BASE}
+    restart: unless-stopped
