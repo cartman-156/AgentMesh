@@ -1,0 +1,33 @@
+.health-page__header {
+  margin-bottom: 2rem;
+}
+
+.health-page__title {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--text-primary);
+}
+
+.health-page__copy {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+}
+
+.health-page__content {
+  display: grid;
+  gap: 2rem;
+}
+
+.health-page__card {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 2rem;
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+.health-page__section-title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}

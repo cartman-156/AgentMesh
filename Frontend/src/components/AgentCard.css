@@ -1,5 +1,6 @@
 .agent-card {
-  width: 100%;
+  min-width: 400px;
+  width: 500px;
   display: flex;
   flex-direction: column;
   gap: 5px;

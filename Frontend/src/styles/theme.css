@@ -67,6 +67,8 @@ a {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: var(--bg);
   color: var(--text-primary);
 }
@@ -74,6 +76,7 @@ a {
 .app-content {
   display: flex;
   flex: 1;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -109,7 +112,9 @@ a {
   border-radius: 0.75rem;
   text-decoration: none;
   color: var(--text-secondary);
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   transition: all 0.2s ease;
 }
 
@@ -125,6 +130,16 @@ a {
   font-weight: 600;
 }
 
+.nav-link__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.nav-link__label {
+  white-space: nowrap;
+}
+
 .main-view {
   flex: 1;
   display: flex;
@@ -135,9 +150,13 @@ a {
 .main-content {
   flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .main-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   border-bottom: 1px solid var(--border);
   background: linear-gradient(135deg, var(--accent-soft) 0%, var(--surface) 100%);
   padding: 1rem 2rem;
@@ -179,8 +198,11 @@ a {
 }
 
 .main-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
   border-top: 1px solid var(--border);
-  background: linear-gradient(135deg, var(--success-soft) 0%, var(--surface) 100%);
+  background: linear-gradient(135deg, var(--accent-soft) 0%, var(--surface) 100%);
   padding: 1rem 2rem;
   text-align: center;
   box-shadow: var(--card-shadow);
@@ -214,7 +236,6 @@ a {
 }
 
 .card {
-  flex: 1;
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 1rem;
@@ -381,4 +402,53 @@ a {
 button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.footer {
+  width: 100%;
+  padding: 1rem 2rem;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, var(--accent-soft) 0%, var(--surface) 100%);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.footer-text {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  line-height: 1.6;
+}
+
+.footer-brand {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.footer-divider {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.footer-company {
+ color: #3b82f6;
+  font-weight: 600;
+}
+
+.footer-tagline {
+ color: #3b82f6;
+  font-style: italic;
 }

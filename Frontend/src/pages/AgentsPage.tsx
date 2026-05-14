@@ -4,7 +4,8 @@ import { listAgents, approveAgent, deregisterAgent } from '../api';
 import type { AgentModel } from '../api/types';
 import AgentCard from '../components/AgentCard';
 import AgentDetailModal from '../components/AgentDetailModal';
-import './AgentsPage.css';
+import RegisterAgentModal from '../components/RegisterAgentModal';
+import '../styles/AgentsPage.css';
 
 const AgentsPage = () => {
   const [agents, setAgents] = useState<AgentModel[]>([]);
@@ -12,6 +13,13 @@ const AgentsPage = () => {
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'registered' | 'approved' | 'deregistered'>('all');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+
+  const openRegisterModal = () => setShowRegisterModal(true);
+  const closeRegisterModal = () => setShowRegisterModal(false);
+  const handleRegisterSuccess = () => {
+    loadAgents();
+  };
 
   const loadAgents = async () => {
     try {
@@ -107,21 +115,29 @@ const AgentsPage = () => {
               A registry view of agents with lifecycle actions and status information.
             </p>
           </div>
-          <div className="agents-page__filters">
-            {(['all', 'registered', 'approved', 'deregistered'] as const).map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => setStatusFilter(status)}
-                className={`filter-button ${statusFilter === status ? 'filter-button--active' : ''}`}
-              >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </button>
-            ))}
+          <div className="agents-page__header-controls">
+            <div className="agents-page__filters">
+              {(['all', 'registered', 'approved', 'deregistered'] as const).map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  onClick={() => setStatusFilter(status)}
+                  className={`filter-button ${statusFilter === status ? 'filter-button--active' : ''}`}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={openRegisterModal}
+              className="btn btn-primary agents-page__register-button"
+            >
+              Register Agent
+            </button>
           </div>
         </div>
       </header>
-
       {loading ? (
         <p>Loading agents…</p>
       ) : (
@@ -149,6 +165,13 @@ const AgentsPage = () => {
           agentId={selectedAgentId}
           onClose={closeDetailModal}
           onActionComplete={loadAgents}
+        />
+      )}
+
+      {showRegisterModal && (
+        <RegisterAgentModal
+          onClose={closeRegisterModal}
+          onRegisterSuccess={handleRegisterSuccess}
         />
       )}
     </main>
