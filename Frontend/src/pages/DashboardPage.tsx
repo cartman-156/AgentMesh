@@ -4,7 +4,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveCo
 import { getSystemHealth, listAgents } from '../api';
 import type { AgentModel, SystemHealthResponse } from '../api/types';
 import MetricCard from '../components/MetricCard';
-import './DashboardPage.css';
+import '../styles/DashboardPage.css';
 
 const parseCapabilityDistribution = (agents: AgentModel[]) => {
   const counts = new Map<string, number>();

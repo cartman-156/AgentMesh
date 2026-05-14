@@ -13,41 +13,8 @@ import {
   deregisterAgent,
 } from '../api';
 import type { AgentModel, AgentHealthResponse } from '../api/types';
+import { CheckIcon, CloseIcon, TrashIcon, XIcon } from '../utils/icons';
 import './AgentDetailModal.css';
-
-type IconProps = {
-  className?: string;
-};
-
-const CheckIcon = ({ className }: IconProps) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 6L9 17l-5-5" />
-  </svg>
-);
-
-const CloseIcon = ({ className }: IconProps) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 6 6 18" />
-    <path d="M6 6l12 12" />
-  </svg>
-);
-
-const TrashIcon = ({ className }: IconProps) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 6h18" />
-    <path d="M8 6V4h8v2" />
-    <path d="M19 6 17.5 20H6.5L5 6" />
-    <path d="M10 11v6" />
-    <path d="M14 11v6" />
-  </svg>
-);
-
-const XIcon = ({ className }: IconProps) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 6L6 18" />
-    <path d="M6 6l12 12" />
-  </svg>
-);
 
 const badgeStyles: Record<string, CSSProperties> = {
   registered: { backgroundColor: 'var(--surface-soft)', color: 'var(--text-primary)', border: '1px solid var(--border)' },

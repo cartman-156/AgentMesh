@@ -1,13 +1,11 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import PublicRoute from './PublicRoute';
-import ProtectedRoute from './ProtectedRoute';
-import DashboardPage from '../pages/DashboardPage';
-import AgentsPage from '../pages/AgentsPage';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import AgentDetailPage from '../pages/AgentDetailPage';
-import RegisterPage from '../pages/RegisterPage';
-import SearchPage from '../pages/SearchPage';
-import HealthPage from '../pages/HealthPage';
+import AgentsPage from '../pages/AgentsPage';
+import DashboardPage from '../pages/DashboardPage';
 import DebugPage from '../pages/DebugPage';
+import HealthPage from '../pages/HealthPage';
+import SearchPage from '../pages/SearchPage';
+import PublicRoute from './PublicRoute';
 
 const AppRoutes = () => (
   <Routes>
@@ -32,14 +30,6 @@ const AppRoutes = () => (
       element={
         <PublicRoute>
           <AgentDetailPage />
-        </PublicRoute>
-      }
-    />
-    <Route
-      path="/register"
-      element={
-        <PublicRoute>
-          <RegisterPage />
         </PublicRoute>
       }
     />

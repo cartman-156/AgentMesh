@@ -1,4 +1,5 @@
 import type { AgentModel } from '../api/types';
+import { EyeIcon, CheckIcon, CloseIcon, TrashIcon } from '../utils/icons';
 import './AgentCard.css';
 
 export type AgentCardProps = {
@@ -9,40 +10,6 @@ export type AgentCardProps = {
   onDeregister: (agentId: string) => void;
   onView: (agentId: string) => void;
 };
-
-type IconProps = {
-  className?: string;
-};
-
-const EyeIcon = ({ className }: IconProps) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
-
-const CheckIcon = ({ className }: IconProps) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 6L9 17l-5-5" />
-  </svg>
-);
-
-const CloseIcon = ({ className }: IconProps) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 6 6 18" />
-    <path d="M6 6l12 12" />
-  </svg>
-);
-
-const TrashIcon = ({ className }: IconProps) => (
-  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 6h18" />
-    <path d="M8 6V4h8v2" />
-    <path d="M19 6 17.5 20H6.5L5 6" />
-    <path d="M10 11v6" />
-    <path d="M14 11v6" />
-  </svg>
-);
 
 const getLifecycleStatus = (agent: AgentModel) => {
   if (agent.deregistered === 1) return 'deregistered';

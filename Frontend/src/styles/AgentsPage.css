@@ -10,6 +10,19 @@
   flex-wrap: wrap;
 }
 
+.agents-page__header-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+
+.agents-page__register-button {
+  white-space: nowrap;
+}
+
 .agents-page__title {
   margin: 0;
   font-size: 2rem;

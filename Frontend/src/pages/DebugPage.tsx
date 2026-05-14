@@ -13,6 +13,7 @@ import type {
   DebugHealthResponse,
   SearchAgentsQuery,
 } from '../api/types';
+import '../styles/DebugPage.css';
 
 type DebugView = 'agent' | 'search' | 'health' | 'state';
 
@@ -78,20 +79,20 @@ const DebugPage = () => {
     switch (currentView) {
       case 'agent':
         return (
-          <section>
-            <h2>Agent Inspection</h2>
-            <form onSubmit={handleAgentInspection} style={{ display: 'grid', gap: '12px', maxWidth: '400px' }}>
-              <label>
-                Agent ID
+          <section className="debug-page__section">
+            <h2 className="debug-page__section-title">Agent Inspection</h2>
+            <form onSubmit={handleAgentInspection} className="debug-page__form">
+              <label className="debug-page__field">
+                <span className="debug-page__label">Agent ID</span>
                 <input
                   value={agentId}
                   onChange={(e) => setAgentId(e.target.value)}
                   placeholder="Enter agent ID"
                   required
-                  style={{ padding: '8px', width: '100%' }}
+                  className="debug-page__input"
                 />
               </label>
-              <button type="submit" disabled={loading} style={{ padding: '10px' }}>
+              <button type="submit" disabled={loading} className="debug-page__button">
                 {loading ? 'Loading...' : 'Inspect Agent'}
               </button>
             </form>
@@ -99,48 +100,48 @@ const DebugPage = () => {
         );
       case 'search':
         return (
-          <section>
-            <h2>Search Trace Visualization</h2>
-            <form onSubmit={handleSearchTrace} style={{ display: 'grid', gap: '12px', maxWidth: '400px' }}>
-              <label>
-                Agent ID
+          <section className="debug-page__section">
+            <h2 className="debug-page__section-title">Search Trace Visualization</h2>
+            <form onSubmit={handleSearchTrace} className="debug-page__form">
+              <label className="debug-page__field">
+                <span className="debug-page__label">Agent ID</span>
                 <input
                   value={searchParams.agent_id || ''}
                   onChange={(e) => setSearchParams({ ...searchParams, agent_id: e.target.value || undefined })}
                   placeholder="Optional agent ID"
-                  style={{ padding: '8px', width: '100%' }}
+                  className="debug-page__input"
                 />
               </label>
-              <label>
-                Name
+              <label className="debug-page__field">
+                <span className="debug-page__label">Name</span>
                 <input
                   value={searchParams.name || ''}
                   onChange={(e) => setSearchParams({ ...searchParams, name: e.target.value || undefined })}
                   placeholder="Optional name"
-                  style={{ padding: '8px', width: '100%' }}
+                  className="debug-page__input"
                 />
               </label>
-              <label>
-                Capability
+              <label className="debug-page__field">
+                <span className="debug-page__label">Capability</span>
                 <input
                   value={searchParams.capability || ''}
                   onChange={(e) => setSearchParams({ ...searchParams, capability: e.target.value || undefined })}
                   placeholder="Optional capability"
-                  style={{ padding: '8px', width: '100%' }}
+                  className="debug-page__input"
                 />
               </label>
-              <label>
-                Match
+              <label className="debug-page__field">
+                <span className="debug-page__label">Match</span>
                 <select
                   value={searchParams.match || 'partial'}
                   onChange={(e) => setSearchParams({ ...searchParams, match: e.target.value as 'exact' | 'partial' })}
-                  style={{ padding: '8px', width: '100%' }}
+                  className="debug-page__select"
                 >
                   <option value="partial">Partial</option>
                   <option value="exact">Exact</option>
                 </select>
               </label>
-              <button type="submit" disabled={loading} style={{ padding: '10px' }}>
+              <button type="submit" disabled={loading} className="debug-page__button">
                 {loading ? 'Loading...' : 'Run Search Trace'}
               </button>
             </form>
@@ -148,20 +149,20 @@ const DebugPage = () => {
         );
       case 'health':
         return (
-          <section>
-            <h2>Health Check History</h2>
-            <form onSubmit={handleHealthHistory} style={{ display: 'grid', gap: '12px', maxWidth: '400px' }}>
-              <label>
-                Agent ID
+          <section className="debug-page__section">
+            <h2 className="debug-page__section-title">Health Check History</h2>
+            <form onSubmit={handleHealthHistory} className="debug-page__form">
+              <label className="debug-page__field">
+                <span className="debug-page__label">Agent ID</span>
                 <input
                   value={agentId}
                   onChange={(e) => setAgentId(e.target.value)}
                   placeholder="Enter agent ID"
                   required
-                  style={{ padding: '8px', width: '100%' }}
+                  className="debug-page__input"
                 />
               </label>
-              <button type="submit" disabled={loading} style={{ padding: '10px' }}>
+              <button type="submit" disabled={loading} className="debug-page__button">
                 {loading ? 'Loading...' : 'View Health History'}
               </button>
             </form>
@@ -169,9 +170,9 @@ const DebugPage = () => {
         );
       case 'state':
         return (
-          <section>
-            <h2>System State Snapshot</h2>
-            <button onClick={handleSystemState} disabled={loading} style={{ padding: '10px' }}>
+          <section className="debug-page__section">
+            <h2 className="debug-page__section-title">System State Snapshot</h2>
+            <button onClick={handleSystemState} disabled={loading} className="debug-page__button">
               {loading ? 'Loading...' : 'Load System State'}
             </button>
           </section>
@@ -182,32 +183,34 @@ const DebugPage = () => {
   };
 
   return (
-    <main className="page-shell" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <h1>Debug Viewer</h1>
-      <p>Inspect agents, visualize search traces, review health history, and view system state.</p>
+    <main className="page-shell">
+      <header className="debug-page__header">
+        <h1 className="debug-page__title">Debug Viewer</h1>
+        <p className="debug-page__copy">Inspect agents, visualize search traces, review health history, and view system state.</p>
+      </header>
 
-      <nav style={{ marginBottom: '24px' }}>
+      <nav className="debug-page__nav">
         <button
           onClick={() => setCurrentView('agent')}
-          style={{ marginRight: '12px', padding: '8px 16px', background: currentView === 'agent' ? 'var(--surface-soft)' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.75rem' }}
+          className={`debug-page__nav-button ${currentView === 'agent' ? 'debug-page__nav-button--active' : ''}`}
         >
           Agent Inspection
         </button>
         <button
           onClick={() => setCurrentView('search')}
-          style={{ marginRight: '12px', padding: '8px 16px', background: currentView === 'search' ? 'var(--surface-soft)' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.75rem' }}
+          className={`debug-page__nav-button ${currentView === 'search' ? 'debug-page__nav-button--active' : ''}`}
         >
           Search Trace
         </button>
         <button
           onClick={() => setCurrentView('health')}
-          style={{ marginRight: '12px', padding: '8px 16px', background: currentView === 'health' ? 'var(--surface-soft)' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.75rem' }}
+          className={`debug-page__nav-button ${currentView === 'health' ? 'debug-page__nav-button--active' : ''}`}
         >
           Health History
         </button>
         <button
           onClick={() => setCurrentView('state')}
-          style={{ padding: '8px 16px', background: currentView === 'state' ? 'var(--surface-soft)' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0.75rem' }}
+          className={`debug-page__nav-button ${currentView === 'state' ? 'debug-page__nav-button--active' : ''}`}
         >
           System State
         </button>
@@ -216,9 +219,9 @@ const DebugPage = () => {
       {renderView()}
 
       {!!data && (
-        <section style={{ marginTop: '24px' }}>
-          <h2>Debug Data</h2>
-          <pre style={{ background: '#f4f4f4', padding: '12px', borderRadius: '8px', overflow: 'auto' }}>
+        <section className="debug-page__data">
+          <h2 className="debug-page__data-title">Debug Data</h2>
+          <pre className="debug-page__data-pre">
             {JSON.stringify(data, null, 2)}
           </pre>
         </section>
