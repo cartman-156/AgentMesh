@@ -1,26 +1,28 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import toast from 'react-hot-toast';
+import Editor from 'react-simple-code-editor';
+import Prism from "prismjs";
+import "prismjs/components/prism-json";
+import "prismjs/themes/prism.css";
 import { registerAgent } from '../api';
 import type { RegisterAgentResponse } from '../api/types';
+import './RegisterPage.css';
 
 const RegisterPage = () => {
   const [mode, setMode] = useState<'json' | 'url'>('json');
   const [agentCard, setAgentCard] = useState<string>('');
   const [agentUrl, setAgentUrl] = useState<string>('');
-  const [response, setResponse] = useState<RegisterAgentResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setResponse(null);
-    setError(null);
 
     const payload: Record<string, unknown> = {};
 
     if (mode === 'json') {
       if (!agentCard.trim()) {
-        setError('Please provide a valid JSON agent card.');
+        toast.error('Please provide a valid JSON agent card.');
         return;
       }
 
@@ -32,13 +34,13 @@ const RegisterPage = () => {
           const fixedCard = agentCard.replace(/([\]}"a-zA-Z0-9])\s*\n\s*"/g, '$1,\n"');
           payload.agent_card = JSON.parse(fixedCard);
         } catch (innerErr) {
-          setError('Invalid JSON. Please correct the agent card and try again.');
+          toast.error('Invalid JSON. Please correct the agent card and try again.');
           return;
         }
       }
     } else {
       if (!agentUrl.trim()) {
-        setError('Please provide a URL to fetch the agent card.');
+        toast.error('Please provide a URL to fetch the agent card.');
         return;
       }
 
@@ -48,18 +50,19 @@ const RegisterPage = () => {
     try {
       setLoading(true);
       const result = await registerAgent(payload);
-      setResponse(result);
+      toast.success(`Agent registered successfully. ID: ${result.id}`);
+      setAgentCard('');
+      setAgentUrl('');
     } catch (err: unknown) {
       if (err && typeof err === 'object' && err !== null && 'data' in err) {
-        // API client error format
         const apiError = err as Record<string, unknown>;
-        setError(
+        toast.error(
           typeof apiError.data === 'string'
             ? (apiError.data as string)
             : JSON.stringify(apiError.data ?? 'Registration failed.')
         );
       } else {
-        setError('Registration failed. Please check your input and try again.');
+        toast.error('Registration failed. Please check your input and try again.');
       }
     } finally {
       setLoading(false);
@@ -67,57 +70,52 @@ const RegisterPage = () => {
   };
 
   return (
-    <main style={{ padding: '2rem', fontFamily: 'Inter, system-ui, sans-serif', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-      <header style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ margin: 0, fontSize: '2rem', color: '#111827' }}>Register Agent</h1>
-        <p style={{ margin: '0.5rem 0 0', color: '#6b7280' }}>
+    <main className="page-shell">
+      <header className="page-header register-page__header">
+        <h1 className="page-title register-page__title">Register Agent</h1>
+        <p className="page-copy register-page__copy">
           Submit a JSON agent card or provide a URL to register an agent with the backend.
         </p>
       </header>
 
-      <section style={{ display: 'grid', gap: '1rem', maxWidth: 900 }}>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button
-            type="button"
-            onClick={() => setMode('json')}
-            style={{
-              flex: 1,
-              padding: '0.75rem 1rem',
-              borderRadius: '0.75rem',
-              border: mode === 'json' ? '1px solid #3b82f6' : '1px solid #d1d5db',
-              backgroundColor: mode === 'json' ? '#eff6ff' : '#ffffff',
-              color: '#1f2937',
-              cursor: 'pointer',
-            }}
-          >
-            JSON Agent Card
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('url')}
-            style={{
-              flex: 1,
-              padding: '0.75rem 1rem',
-              borderRadius: '0.75rem',
-              border: mode === 'url' ? '1px solid #3b82f6' : '1px solid #d1d5db',
-              backgroundColor: mode === 'url' ? '#eff6ff' : '#ffffff',
-              color: '#1f2937',
-              cursor: 'pointer',
-            }}
-          >
-            Agent URL
-          </button>
-        </div>
+      <section className="grid register-page">
+        <section className="card register-page__card">
+          <div className="register-page__toggle">
+            <button
+              type="button"
+              onClick={() => setMode('json')}
+              className={`btn register-page__toggle-button${mode === 'json' ? ' active' : ''}`}
+            >
+              JSON Agent Card
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('url')}
+              className={`btn register-page__toggle-button${mode === 'url' ? ' active' : ''}`}
+            >
+              Agent URL
+            </button>
+          </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
-          {mode === 'json' ? (
-            <label style={{ display: 'grid', gap: '0.5rem' }}>
-              <span style={{ color: '#374151', fontWeight: 600 }}>Agent Card JSON</span>
-              <textarea
-                value={agentCard}
-                onChange={(event) => setAgentCard(event.target.value)}
-                rows={12}
-                placeholder='{
+          <section className="register-page__section">
+            <p className="register-page__hint">
+              {mode === 'json'
+                ? 'Paste a complete agent JSON card below. We will validate the structure before sending it to the backend.'
+                : 'Provide a valid URL where the backend can fetch the agent card from.'}
+            </p>
+
+            <form onSubmit={handleSubmit} className="register-page__form">
+              {mode === 'json' ? (
+                <label className="register-page__field">
+                  <span className="register-page__label">Agent Card JSON</span>
+                  <Editor
+      value={agentCard}
+      onValueChange={setAgentCard}
+      highlight={(code) =>
+        Prism.highlight(code, Prism.languages.json, "json")
+      }
+      padding={16}
+       placeholder='{
   "name": "Example Agent",
   "description": "An A2A-compatible agent",
   "url": "https://example.com/agent",
@@ -126,70 +124,41 @@ const RegisterPage = () => {
   "company": "Acme Corp",
   "capabilities": ["weather", "forecast"]
 }'
-                style={{
-                  width: '100%',
-                  minHeight: '260px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.75rem',
-                  padding: '1rem',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                  fontSize: '0.95rem',
-                  color: '#111827',
-                }}
-              />
-            </label>
-          ) : (
-            <label style={{ display: 'grid', gap: '0.5rem' }}>
-              <span style={{ color: '#374151', fontWeight: 600 }}>Agent Card URL</span>
-              <input
-                type="url"
-                value={agentUrl}
-                onChange={(event) => setAgentUrl(event.target.value)}
-                placeholder="https://example.com"
-                style={{
-                  width: '100%',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.75rem',
-                  padding: '0.75rem 1rem',
-                  fontSize: '0.95rem',
-                  color: '#111827',
-                }}
-              />
-            </label>
-          )}
+      style={{
+        fontFamily: '"Fira code", "Fira Mono", monospace',
+        fontSize: 14,
+        backgroundColor: "#0f172a",
+        color: "#f8fafc",
+        borderRadius: "12px",
+        minHeight: "300px",
+        border: "1px solid #334155"
+      }}
+    />
+                </label>
+              ) : (
+                <label className="register-page__field">
+                  <span className="register-page__label">Agent Card URL</span>
+                  <input
+                    type="url"
+                    value={agentUrl}
+                    onChange={(event) => setAgentUrl(event.target.value)}
+                    placeholder="https://example.com"
+                    className="register-page__input"
+                  />
+                </label>
+              )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              padding: '0.9rem 1.25rem',
-              borderRadius: '0.75rem',
-              border: 'none',
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              fontWeight: 700,
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {loading ? 'Registering…' : 'Register Agent'}
-          </button>
-        </form>
-
-        {response && (
-          <section style={{ borderRadius: '1rem', border: '1px solid #d1fae5', backgroundColor: '#ecfdf5', padding: '1rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1rem', color: '#166534' }}>Registration successful</h2>
-            <p style={{ margin: '0.5rem 0 0', color: '#115e59' }}>
-              Agent registered with ID <strong>{response.id}</strong> and status <strong>{response.status}</strong>.
-            </p>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-primary register-page__submit"
+              >
+                {loading ? 'Registering…' : 'Register Agent'}
+              </button>
+            </form>
           </section>
-        )}
 
-        {error && (
-          <section style={{ borderRadius: '1rem', border: '1px solid #fecaca', backgroundColor: '#fef2f2', padding: '1rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1rem', color: '#991b1b' }}>Registration failed</h2>
-            <p style={{ margin: '0.5rem 0 0', color: '#7f1d1d' }}>{error}</p>
-          </section>
-        )}
+        </section>
       </section>
     </main>
   );

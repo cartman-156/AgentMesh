@@ -1,25 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
-import toast from 'react-hot-toast';
 import { listAgents, approveAgent, deregisterAgent } from '../api';
 import type { AgentModel } from '../api/types';
 import AgentCard from '../components/AgentCard';
-import AgentDetailModal from '../components/AgentDetailModal';
-import './AgentsPage.css';
 
 const AgentsPage = () => {
   const [agents, setAgents] = useState<AgentModel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'registered' | 'approved' | 'deregistered'>('all');
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   const loadAgents = async () => {
     try {
       setLoading(true);
+      setError(null);
       const result = await listAgents();
       setAgents(result.agents);
     } catch (err) {
-      toast.error('Unable to load agents.');
+      setError('Unable to load agents.');
     } finally {
       setLoading(false);
     }
@@ -42,14 +41,15 @@ const AgentsPage = () => {
   }, [agents, statusFilter]);
 
   const handleApprove = async (agentId: string) => {
+    setMessage(null);
     setActionLoadingId(agentId);
 
     try {
       const response = await approveAgent(agentId, { action: 'approve' });
-      toast.success(`Agent ${response.id} was approved successfully.`);
+      setMessage(`Agent ${response.id} was approved successfully.`);
       await loadAgents();
     } catch (err) {
-      toast.error('Approval failed. Please try again.');
+      setError('Approval failed. Please try again.');
     } finally {
       setActionLoadingId(null);
     }
@@ -59,14 +59,15 @@ const AgentsPage = () => {
     const confirmed = window.confirm('Are you sure you want to reject this agent? This action permanently removes the agent from the registry.');
     if (!confirmed) return;
 
+    setMessage(null);
     setActionLoadingId(agentId);
 
     try {
       const response = await approveAgent(agentId, { action: 'reject' });
-      toast.success(`Agent ${response.id} was rejected successfully.`);
+      setMessage(`Agent ${response.id} was rejected successfully.`);
       await loadAgents();
     } catch (err) {
-      toast.error('Rejection failed. Please try again.');
+      setError('Rejection failed. Please try again.');
     } finally {
       setActionLoadingId(null);
     }
@@ -76,44 +77,45 @@ const AgentsPage = () => {
     const confirmed = window.confirm('Are you sure you want to deregister this agent? This action preserves history but removes the agent from active discovery.');
     if (!confirmed) return;
 
+    setMessage(null);
     setActionLoadingId(agentId);
 
     try {
       const response = await deregisterAgent(agentId);
-      toast.success(`Agent ${response.id} was deregistered successfully.`);
+      setMessage(`Agent ${response.id} was deregistered successfully.`);
       await loadAgents();
     } catch (err) {
-      toast.error('Deregistration failed. Please try again.');
+      setError('Deregistration failed. Please try again.');
     } finally {
       setActionLoadingId(null);
     }
   };
 
-  const handleViewDetails = (agentId: string) => {
-    setSelectedAgentId(agentId);
-  };
-
-  const closeDetailModal = () => {
-    setSelectedAgentId(null);
-  };
-
   return (
-    <main className="page-shell">
-      <header className="agents-page__header">
-        <div className="agents-page__header-row">
+    <main style={{ padding: '2rem', minHeight: '100vh', backgroundColor: '#f8fafc', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <header style={{ marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
           <div>
-            <h1 className="agents-page__title">Agents</h1>
-            <p className="agents-page__copy">
+            <h1 style={{ margin: 0, fontSize: '2rem', color: '#111827' }}>Agents</h1>
+            <p style={{ margin: '0.5rem 0 0', color: '#6b7280' }}>
               A registry view of agents with lifecycle actions and status information.
             </p>
           </div>
-          <div className="agents-page__filters">
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             {(['all', 'registered', 'approved', 'deregistered'] as const).map((status) => (
               <button
                 key={status}
                 type="button"
                 onClick={() => setStatusFilter(status)}
-                className={`filter-button ${statusFilter === status ? 'filter-button--active' : ''}`}
+                style={{
+                  padding: '0.65rem 1rem',
+                  borderRadius: '0.75rem',
+                  border: statusFilter === status ? '1px solid #2563eb' : '1px solid #d1d5db',
+                  backgroundColor: statusFilter === status ? '#eff6ff' : '#ffffff',
+                  color: '#111827',
+                  cursor: 'pointer',
+                  fontWeight: statusFilter === status ? 700 : 500,
+                }}
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </button>
@@ -122,10 +124,21 @@ const AgentsPage = () => {
         </div>
       </header>
 
+      {message && (
+        <section style={{ marginBottom: '1rem', padding: '1rem', borderRadius: '1rem', backgroundColor: '#ecfdf5', color: '#166534', border: '1px solid #a7f3d0' }}>
+          {message}
+        </section>
+      )}
+      {error && (
+        <section style={{ marginBottom: '1rem', padding: '1rem', borderRadius: '1rem', backgroundColor: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca' }}>
+          {error}
+        </section>
+      )}
+
       {loading ? (
         <p>Loading agents…</p>
       ) : (
-        <div className="agents-page__cards">
+        <div style={{ display: 'grid', gap: '1rem' }}>
           {filteredAgents.length === 0 ? (
             <p>No agents found.</p>
           ) : (
@@ -137,19 +150,10 @@ const AgentsPage = () => {
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onDeregister={handleDeregister}
-                onView={handleViewDetails}
               />
             ))
           )}
         </div>
-      )}
-
-      {selectedAgentId && (
-        <AgentDetailModal
-          agentId={selectedAgentId}
-          onClose={closeDetailModal}
-          onActionComplete={loadAgents}
-        />
       )}
     </main>
   );

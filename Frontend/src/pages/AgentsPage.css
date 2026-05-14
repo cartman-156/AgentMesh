@@ -1,0 +1,55 @@
+.agents-page__header {
+  margin-bottom: 1.5rem;
+}
+
+.agents-page__header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.agents-page__title {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--text-primary);
+}
+
+.agents-page__copy {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+}
+
+.agents-page__filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-button {
+  padding: 0.65rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+  background-color: var(--surface-soft);
+}
+
+.filter-button--active {
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
+  font-weight: 700;
+}
+
+.agents-page__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
