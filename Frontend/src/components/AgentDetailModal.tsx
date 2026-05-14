@@ -1,18 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { CSSProperties } from 'react';
-import toast from 'react-hot-toast';
-import Editor from 'react-simple-code-editor';
 import Prism from "prismjs";
 import "prismjs/components/prism-json";
 import "prismjs/themes/prism.css";
+import type { CSSProperties } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import Editor from 'react-simple-code-editor';
 import {
+  approveAgent,
+  deregisterAgent,
   getAgent,
   getAgentHealth,
   getDebugAgent,
-  approveAgent,
-  deregisterAgent,
 } from '../api';
-import type { AgentModel, AgentHealthResponse } from '../api/types';
+import type { AgentHealthResponse, AgentModel } from '../api/types';
 import { CheckIcon, CloseIcon, TrashIcon, XIcon } from '../utils/icons';
 import './AgentDetailModal.css';
 
