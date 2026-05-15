@@ -40,6 +40,9 @@ def get_debug_search_endpoint(
     agent_id: Optional[str] = Query(None),
     name: Optional[str] = Query(None),
     capability: Optional[str] = Query(None),
+    description: Optional[str] = Query(None),
+    skills: Optional[str] = Query(None),
+    only_approved: bool = Query(False),
     match: Optional[str] = Query(None)
 ):
     """
@@ -57,6 +60,9 @@ def get_debug_search_endpoint(
             agent_id=agent_id,
             name=name,
             capability=capability,
+            description=description,
+            skills=skills,
+            only_approved=only_approved,
             match=match
         )
         return result

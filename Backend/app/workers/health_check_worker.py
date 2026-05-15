@@ -1,6 +1,7 @@
 import asyncio
+import json
 import time
-from app.db.database import get_db_connection
+from app.db import database
 from app.services.health_service import check_agent_health, update_agent_health_status
 
 
@@ -12,14 +13,21 @@ async def health_check_worker():
     while True:
         try:
             # Get all agents from database
-            with get_db_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT id, url FROM agents")
-                agents = cursor.fetchall()
+            rows = database.get_all_agents_raw()
             
             # Check health for each agent
-            for agent in agents:
-                agent_id, agent_url = agent
+            for row in rows:
+                agent_id = row.get("id")
+                json_data_str = row.get("json_data")
+                
+                # Extract URL from json_data in application layer
+                agent_url = None
+                if json_data_str:
+                    try:
+                        agent_data = json.loads(json_data_str)
+                        agent_url = agent_data.get("url")
+                    except json.JSONDecodeError:
+                        pass
                 
                 if not agent_url:
                     continue

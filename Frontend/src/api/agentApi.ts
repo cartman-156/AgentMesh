@@ -92,6 +92,9 @@ export const searchAgents = async (
     agent_id: params?.agent_id,
     name: params?.name,
     capability: params?.capability,
+    description: params?.description,
+    skills: params?.skills,
+    only_approved: params?.only_approved ? 'true' : undefined,
     match: params?.match,
   });
 
@@ -127,6 +130,9 @@ export const searchDebug = async (
     agent_id: params?.agent_id,
     name: params?.name,
     capability: params?.capability,
+    description: params?.description,
+    skills: params?.skills,
+    only_approved: params?.only_approved ? 'true' : undefined,
     match: params?.match,
   });
 

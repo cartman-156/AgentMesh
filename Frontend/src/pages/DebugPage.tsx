@@ -131,15 +131,30 @@ const DebugPage = () => {
                 />
               </label>
               <label className="debug-page__field">
-                <span className="debug-page__label">Match</span>
-                <select
-                  value={searchParams.match || 'partial'}
-                  onChange={(e) => setSearchParams({ ...searchParams, match: e.target.value as 'exact' | 'partial' })}
-                  className="debug-page__select"
-                >
-                  <option value="partial">Partial</option>
-                  <option value="exact">Exact</option>
-                </select>
+                <span className="debug-page__label">Description</span>
+                <input
+                  value={searchParams.description || ''}
+                  onChange={(e) => setSearchParams({ ...searchParams, description: e.target.value || undefined })}
+                  placeholder="Optional description"
+                  className="debug-page__input"
+                />
+              </label>
+              <label className="debug-page__field">
+                <span className="debug-page__label">Skills</span>
+                <input
+                  value={searchParams.skills || ''}
+                  onChange={(e) => setSearchParams({ ...searchParams, skills: e.target.value || undefined })}
+                  placeholder="Optional skills"
+                  className="debug-page__input"
+                />
+              </label>
+              <label className="debug-page__field debug-page__field--checkbox">
+                <input
+                  type="checkbox"
+                  checked={!!searchParams.only_approved}
+                  onChange={(e) => setSearchParams({ ...searchParams, only_approved: e.target.checked })}
+                />
+                <span className="debug-page__label">Only Approved</span>
               </label>
               <button type="submit" disabled={loading} className="debug-page__button">
                 {loading ? 'Loading...' : 'Run Search Trace'}

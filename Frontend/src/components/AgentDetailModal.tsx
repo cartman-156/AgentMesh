@@ -12,7 +12,7 @@ import {
   approveAgent,
   deregisterAgent,
 } from '../api';
-import type { AgentModel, AgentHealthResponse } from '../api/types';
+import type { AgentModel, AgentHealthResponse, Provider } from '../api/types';
 import { CheckIcon, CloseIcon, TrashIcon, XIcon } from '../utils/icons';
 import './AgentDetailModal.css';
 
@@ -43,7 +43,12 @@ const renderBadge = (text: string, type: string) => (
 
 const parseRawAgentCard = (agent: AgentModel) => {
   try {
-    return JSON.parse(agent.raw_agent_card) as Record<string, unknown>;
+    const raw = JSON.parse(agent.raw_agent_card);
+    // Support both old string format and new Provider object format
+    if (raw && typeof raw.provider === 'object' && raw.provider !== null) {
+      return raw as { provider: Provider; [key: string]: unknown };
+    }
+    return raw as Record<string, unknown>;
   } catch {
     return null;
   }
@@ -91,25 +96,6 @@ const AgentDetailModal = ({ agentId, onClose, onActionComplete }: any) => {
     return parseRawAgentCard(agent);
   }, [agent]);
 
-  const capabilities = useMemo(() => {
-    if (!agent) return { raw: [], canonical: [] as string[] };
-
-    let canonical: string[] = [];
-    try {
-      const payload = JSON.parse(agent.capabilities) as Record<string, unknown>;
-      canonical = Array.isArray(payload?.canonical_capabilities)
-        ? payload.canonical_capabilities.filter((cap): cap is string => typeof cap === 'string')
-        : [];
-    } catch {
-      canonical = [];
-    }
-
-    const raw = Array.isArray(rawAgentCard?.capabilities)
-      ? rawAgentCard.capabilities.filter((item): item is string => typeof item === 'string')
-      : [];
-
-    return { raw, canonical };
-  }, [agent, rawAgentCard]);
 
   const lifecycleStatus = useMemo(() => {
     if (!agent) return 'unknown';
@@ -182,11 +168,17 @@ const AgentDetailModal = ({ agentId, onClose, onActionComplete }: any) => {
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-dialog" onClick={(event) => event.stopPropagation()}>
         <div className="modal-header">
-          <div>
-            <h2 className="modal-dialog__heading">Agent details</h2>
-            <p className="modal-dialog__subtext">
-              View lifecycle state, health, capabilities, and debug diagnostics.
-            </p>
+          <div style={{ flex: 1 }}>
+            {!loading && agent ? (
+              <>
+                <h2 className="modal-dialog__heading">{agent.name}</h2>
+                <p className="modal-dialog__description" style={{ marginTop: '0.5rem', color: 'var(--text-muted)' }}>
+                  {agent.description}
+                </p>
+              </>
+            ) : (
+              <h2 className="modal-dialog__heading">Agent details</h2>
+            )}
           </div>
           <div className="modal-header__actions">
             {lifecycleStatus === 'registered' && (
@@ -239,46 +231,164 @@ const AgentDetailModal = ({ agentId, onClose, onActionComplete }: any) => {
           <p>Agent details are unavailable.</p>
         ) : (
           <div className="modal-section">
-            <div className="modal-dialog__row">
-              <div>
-                <h3 className="modal-dialog__heading">{agent.name}</h3>
-                <p className="modal-dialog__subtext">Agent ID: {agent.id}</p>
-              </div>
-              <div className="modal-badge-row">
+            {!loading && agent && (
+              <div className="modal-badge-row" style={{ marginBottom: '1.5rem' }}>
                 {renderBadge(lifecycleStatus, lifecycleStatus)}
                 {agent.status && renderBadge(agent.status, agent.status)}
               </div>
+            )}
+
+            <div className="card modal-card">
+              <h4 className="modal-dialog__heading">Agent Information</h4>
+              <dl className="detail-meta">
+                <div>
+                  <dt>Endpoint</dt>
+                  <dd>
+                    {agent.url ? (
+                      <a href={agent.url} target="_blank" rel="noopener noreferrer" className="provider-link">
+                        {agent.url}
+                      </a>
+                    ) : (
+                      'N/A'
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Version</dt>
+                  <dd>{agent.version || 'N/A'}</dd>
+                </div>
+                <div>
+                  <dt>Company</dt>
+                  <dd>{agent.company || 'N/A'}</dd>
+                </div>
+                <div>
+                  <dt>Provider</dt>
+                  <dd>
+                    {rawAgentCard?.provider && typeof rawAgentCard.provider === 'object' ? (
+                      <div className="provider-info">
+                        <span className="provider-info__name">{(rawAgentCard.provider as Provider).name}</span>
+                        <div className="provider-info__links">
+                          <a 
+                            href={(rawAgentCard.provider as Provider).website} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="provider-link"
+                          >
+                            Website
+                          </a>
+                          <span className="provider-info__divider">|</span>
+                          <a 
+                            href={`mailto:${(rawAgentCard.provider as Provider).contact_email}`}
+                            className="provider-link"
+                          >
+                            Contact
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      (rawAgentCard?.provider as string) ?? 'N/A'
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Lifecycle state</dt>
+                  <dd>{lifecycleStatus}</dd>
+                </div>
+              </dl>
             </div>
 
-            <div className="modal-dialog__two-col">
+            <div className="modal-dialog__two-col" style={{ marginTop: '1.5rem' }}>
               <div className="card modal-card">
-                <h4 className="modal-dialog__heading">Metadata</h4>
-                <dl className="detail-meta">
-                  <div>
-                    <dt>URL</dt>
-                    <dd>{agent.url || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt>Version</dt>
-                    <dd>{agent.version || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt>Company</dt>
-                    <dd>{agent.company || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt>Provider</dt>
-                    <dd>{(rawAgentCard?.provider as string) ?? 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt>Lifecycle state</dt>
-                    <dd>{lifecycleStatus}</dd>
-                  </div>
-                </dl>
+                <h4 className="modal-dialog__heading" style={{ marginBottom: '1rem' }}>Capabilities</h4>
+                <div className="capabilities-grid">
+                  {agent.capabilities && (() => {
+                    try {
+                      const payload = typeof agent.capabilities === 'string'
+                        ? JSON.parse(agent.capabilities || '{}')
+                        : agent.capabilities;
+                        
+                      if (!payload || typeof payload !== 'object') return null;
+                      
+                      // Handle structured normalization object
+                      let displayCaps: any = payload;
+                      let isList = false;
+                      
+                      if (payload.normalized_capabilities && Array.isArray(payload.normalized_capabilities)) {
+                        displayCaps = payload.normalized_capabilities;
+                        isList = true;
+                      } else if (payload.raw_capabilities) {
+                        displayCaps = payload.raw_capabilities;
+                        isList = Array.isArray(displayCaps);
+                      }
+                      
+                      if (isList) {
+                        return (displayCaps as any[]).map((name) => (
+                          <div key={String(name)} className="capability-item">
+                            <span className="capability-icon capability-icon--true">
+                              <CheckIcon />
+                            </span>
+                            <span className="capability-name">
+                              {String(name).replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                        ));
+                      }
+                      
+                      return Object.entries(displayCaps).map(([name, value]) => (
+                        <div key={name} className="capability-item">
+                          <span className={`capability-icon ${value ? 'capability-icon--true' : 'capability-icon--false'}`}>
+                            {value ? <CheckIcon /> : <CloseIcon />}
+                          </span>
+                          <span className="capability-name">
+                            {name.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                      ));
+                    } catch {
+                      return <p className="detail-debug__status">Invalid capability data.</p>;
+                    }
+                  })()}
+                </div>
               </div>
 
               <div className="card modal-card">
-                <h4 className="modal-dialog__heading">Health</h4>
+                <h4 className="modal-dialog__heading" style={{ marginBottom: '1rem' }}>Skills</h4>
+                <div className="detail-tags__group">
+                  {(() => {
+                    try {
+                      const skills = typeof agent.skills === 'string'
+                        ? JSON.parse(agent.skills || '[]')
+                        : agent.skills;
+                        
+                      if (!Array.isArray(skills) || skills.length === 0) {
+                        return <p className="detail-debug__status">No skills available.</p>;
+                      }
+                      return skills.map((skill: any, idx: number) => {
+                        const skillLabel = typeof skill === 'object' && skill !== null 
+                          ? (skill.name || JSON.stringify(skill)) 
+                          : String(skill);
+                        return (
+                          <span key={`${skillLabel}-${idx}`} className="tag tag--skill">
+                            {skillLabel}
+                          </span>
+                        );
+                      });
+                    } catch {
+                      return <p className="detail-debug__status">No skills available.</p>;
+                    }
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            <details className="card modal-card debug-details" style={{ marginTop: '1.5rem' }}>
+              <summary className="modal-dialog__row" style={{ cursor: 'pointer', listStyle: 'none' }}>
+                <h4 className="modal-dialog__heading" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  Health Metrics
+                  <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-muted)' }}>(Click to expand)</span>
+                </h4>
+              </summary>
+              <div style={{ marginTop: '1.5rem' }}>
                 <dl className="detail-meta">
                   <div>
                     <dt>Status</dt>
@@ -294,77 +404,43 @@ const AgentDetailModal = ({ agentId, onClose, onActionComplete }: any) => {
                   </div>
                 </dl>
               </div>
-            </div>
+            </details>
 
-            <div className="card modal-card">
-              <div className="modal-dialog__row">
-                <h4 className="modal-dialog__heading">Capabilities</h4>
-                <div className="detail-debug__status">
-                  {capabilities.raw.length > 0 ? `${capabilities.raw.length} raw` : 'No raw capabilities'}
-                  {capabilities.canonical.length > 0 ? ` · ${capabilities.canonical.length} canonical` : ''}
+            <details className="card modal-card debug-details">
+              <summary className="modal-dialog__row" style={{ cursor: 'pointer', listStyle: 'none' }}>
+                <h4 className="modal-dialog__heading" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  Debug information
+                  <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-muted)' }}>(Click to expand)</span>
+                </h4>
+              </summary>
+              <div style={{ marginTop: '1rem' }}>
+                <div className="detail-debug__status" style={{ marginBottom: '0.5rem' }}>
+                  {debugInfo ? 'Loaded from debug API' : 'Debug details unavailable'}
                 </div>
+                {debugInfo ? (
+                  <div className="detail-debug__editor">
+                    <Editor
+                      value={JSON.stringify(debugInfo, null, 2)}
+                      onValueChange={() => {}}
+                      highlight={(code) => Prism.highlight(code, Prism.languages.json, 'json')}
+                      padding={15}
+                      style={{
+                        fontFamily: '"Fira code", "Fira Mono", monospace',
+                        fontSize: 12,
+                        backgroundColor: 'var(--color-background-secondary)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 'var(--border-radius)',
+                      }}
+                      readOnly
+                    />
+                  </div>
+                ) : (
+                  <p className="detail-debug__status">
+                    Debug details are not available for this agent or the debug API did not return additional information.
+                  </p>
+                )}
               </div>
-
-              <div className="detail-tags">
-                <div>
-                  <p className="detail-tags__heading">Raw capability tags</p>
-                  {capabilities.raw.length === 0 ? (
-                    <p className="detail-debug__status">No raw capability data available.</p>
-                  ) : (
-                    <div className="detail-tags__group">
-                      {capabilities.raw.map((capability) => (
-                        <span key={capability} className="tag tag--raw">
-                          {capability}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p className="detail-tags__heading">Canonical capability tags</p>
-                  {capabilities.canonical.length === 0 ? (
-                    <p className="detail-debug__status">No canonical capability data available.</p>
-                  ) : (
-                    <div className="detail-tags__group">
-                      {capabilities.canonical.map((capability) => (
-                        <span key={capability} className="tag tag--canonical">
-                          {capability}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="card modal-card">
-              <div className="modal-dialog__row">
-                <h4 className="modal-dialog__heading">Debug information</h4>
-                <div className="detail-debug__status">{debugInfo ? 'Loaded from debug API' : 'Debug details unavailable'}</div>
-              </div>
-              {debugInfo ? (
-                <div className="detail-debug__editor">
-                  <Editor
-                    value={JSON.stringify(debugInfo, null, 2)}
-                    onValueChange={() => {}}
-                    highlight={(code) => Prism.highlight(code, Prism.languages.json, 'json')}
-                    padding={15}
-                    style={{
-                      fontFamily: '"Fira code", "Fira Mono", monospace',
-                      fontSize: 12,
-                      backgroundColor: 'var(--color-background-secondary)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--border-radius)',
-                    }}
-                    readOnly
-                  />
-                </div>
-              ) : (
-                <p className="detail-debug__status">
-                  Debug details are not available for this agent or the debug API did not return additional information.
-                </p>
-              )}
-            </div>
+            </details>
           </div>
         )}
       </div>

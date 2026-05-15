@@ -77,7 +77,7 @@ describe('API Client Tests', () => {
   describe('getAgent', () => {
     it('calls GET /agents/{id}', async () => {
       const agentId = '123';
-      const response: GetAgentResponse = { agent: { id: '123', name: 'test', description: '', url: '', version: '', capabilities: '{}', raw_agent_card: '{}', status: 'healthy', latency_ms: null, last_seen: null, approved: 1, deregistered: 0 } };
+      const response: GetAgentResponse = { agent: { id: '123', name: 'test', description: '', url: '', version: '', capabilities: '{}', skills: '[]', raw_agent_card: '{}', status: 'healthy', latency_ms: null, last_seen: null, approved: 1, deregistered: 0 } };
       mockApiClient.get.mockResolvedValue({ data: response, status: 200 });
 
       const result = await getAgent(agentId);

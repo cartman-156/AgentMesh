@@ -287,6 +287,7 @@ class TestHealthWorker:
         from app.db.database import get_db_connection
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT url FROM agents WHERE id = ?", (reg_result["id"],))
+            cursor.execute("SELECT json_data FROM agents WHERE id = ?", (reg_result["id"],))
             row = cursor.fetchone()
-            assert row[0] is None or row[0] == ""
+            data = json.loads(row[0])
+            assert data.get("url") is None or data.get("url") == ""

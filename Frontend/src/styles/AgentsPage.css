@@ -1,26 +1,29 @@
 .agents-page__header {
-  margin-bottom: 1.5rem;
-}
-
-.agents-page__header-row {
+  margin-bottom: 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.agents-page__header-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-  justify-content: flex-end;
   flex-direction: column;
+  gap: 1.5rem;
+}
+
+.agents-page__action-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.agents-page__info-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.agents-page__filter-row {
+  display: flex;
+  align-items: center;
 }
 
 .agents-page__register-button {
   white-space: nowrap;
+  font-size: 1rem;
 }
 
 .agents-page__title {
@@ -41,13 +44,14 @@
 }
 
 .filter-button {
-  padding: 0.65rem 1rem;
+  padding: 0.5rem 0.9rem;
   border-radius: 0.75rem;
   border: 1px solid var(--border);
   background-color: var(--surface);
   color: var(--text-primary);
   cursor: pointer;
   font-weight: 500;
+  font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 
