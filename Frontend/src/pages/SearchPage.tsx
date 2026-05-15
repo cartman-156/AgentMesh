@@ -148,6 +148,7 @@ const SearchPage = () => {
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onDeregister={handleDeregister}
+                showActions={false}
               />
             ))}
           </div>

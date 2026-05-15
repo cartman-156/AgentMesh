@@ -47,6 +47,13 @@ export const TrashIcon = ({ className }: IconProps) => (
   </svg>
 );
 
+export const StopIcon = ({ className }: IconProps) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="7" y1="12" x2="17" y2="12" />
+  </svg>
+);
+
 export const XIcon = ({ className }: IconProps) => (
   <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 6L6 18" />

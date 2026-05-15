@@ -1,5 +1,5 @@
 import type { AgentModel, Provider } from '../api/types';
-import { EyeIcon, CheckIcon, CloseIcon, TrashIcon } from '../utils/icons';
+import { EyeIcon, CheckIcon, TrashIcon, StopIcon } from '../utils/icons';
 import './AgentCard.css';
 
 export type AgentCardProps = {
@@ -9,6 +9,7 @@ export type AgentCardProps = {
   onReject: (agentId: string) => void;
   onDeregister: (agentId: string) => void;
   onView: (agentId: string) => void;
+  showActions?: boolean;
 };
 
 const getLifecycleStatus = (agent: AgentModel) => {
@@ -63,6 +64,7 @@ const AgentCard = ({
   onReject,
   onDeregister,
   onView,
+  showActions = true,
 }: AgentCardProps) => {
   const lifecycleStatus = getLifecycleStatus(agent);
   const enabledCapabilities = getEnabledCapabilities(agent);
@@ -155,42 +157,44 @@ const AgentCard = ({
         </div>
       </div>
 
-      <div className="agent-card__actions">
-        {lifecycleStatus === 'registered' && (
+      {showActions && (
+        <div className="agent-card__actions">
+          {lifecycleStatus === 'registered' && (
+            <button
+              type="button"
+              onClick={() => onApprove(agent.id)}
+              disabled={isActionLoading}
+              className="action-button action-button--approve"
+              title="Approve agent"
+              aria-label="Approve agent"
+            >
+              <CheckIcon className="action-button__icon" />
+            </button>
+          )}
+          {lifecycleStatus === 'registered' && (
+            <button
+              type="button"
+              onClick={() => onReject(agent.id)}
+              disabled={isActionLoading}
+              className="action-button action-button--danger"
+              title="Reject agent"
+              aria-label="Reject agent"
+            >
+              <TrashIcon className="action-button__icon" />
+            </button>
+          )}
           <button
             type="button"
-            onClick={() => onApprove(agent.id)}
-            disabled={isActionLoading}
-            className="action-button action-button--approve"
-            title="Approve agent"
-            aria-label="Approve agent"
+            onClick={() => onDeregister(agent.id)}
+            disabled={isActionLoading || lifecycleStatus === 'deregistered'}
+            className={`action-button ${lifecycleStatus === 'deregistered' ? 'action-button--secondary' : 'action-button--deregister'}`}
+            title="Deregister agent"
+            aria-label="Deregister agent"
           >
-            <CheckIcon className="action-button__icon" />
+            <StopIcon className="action-button__icon" />
           </button>
-        )}
-        {lifecycleStatus === 'registered' && (
-          <button
-            type="button"
-            onClick={() => onReject(agent.id)}
-            disabled={isActionLoading}
-            className="action-button action-button--danger"
-            title="Reject agent"
-            aria-label="Reject agent"
-          >
-            <CloseIcon className="action-button__icon" />
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={() => onDeregister(agent.id)}
-          disabled={isActionLoading || lifecycleStatus === 'deregistered'}
-          className={`action-button ${lifecycleStatus === 'deregistered' ? 'action-button--secondary' : 'action-button--deregister'}`}
-          title="Deregister agent"
-          aria-label="Deregister agent"
-        >
-          <TrashIcon className="action-button__icon" />
-        </button>
-      </div>
+        </div>
+      )}
     </article>
   );
 };

@@ -122,24 +122,25 @@
 .action-button--approve {
   background: #16a34a !important;
   color: #ffffff;
-  border-color: var(--accent);
+  border-color: #15803d;
 }
 
 .action-button--primary {
   background: #16a34a;
   color: #ffffff;
-  border-color: var(--accent);
+  border-color: #15803d;
 }
 
 .action-button--danger {
-  background: #f59e0b;
+  background: #ef4444 !important;
   color: #ffffff;
-  border-color: var(--danger);
+  border-color: #dc2626;
 }
+
 .action-button--deregister {
   background: #ef4444 !important;
   color: #ffffff;
-  border-color: var(--danger);
+  border-color: #dc2626;
 }
 
 .action-button--secondary {
