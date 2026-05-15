@@ -221,7 +221,13 @@ def get_agent_by_id(agent_id: str) -> Optional[Dict[str, Any]]:
     # Map flags
     res["approved"] = 1 if res.get("approval_status") == "approved" else 0
     res["deregistered"] = 1 if res.get("approval_status") == "deregistered" else 0
-    res["status"] = res.get("health") or "healthy"
+    
+    # Priority for status: deregistered > health
+    if res.get("approval_status") == "deregistered":
+        res["status"] = "deregistered"
+    else:
+        res["status"] = res.get("health") or "healthy"
+        
     res["last_seen"] = res.get("last_checked")
     
     # Explicitly ensure URL is present

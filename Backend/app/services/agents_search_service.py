@@ -52,31 +52,54 @@ def search_agents(
                 if name_lower in (a.get("json_data") or {}).get("name", "").lower() or name_lower in a.get("name", "").lower()
             ]
         
-    # Apply description filter
+    # Apply description filter - Smart search: checks description, name, and capabilities
     if description is not None:
         desc_lower = description.lower()
-        if match == "exact":
-            agents = [
-                a for a in agents 
-                if desc_lower == (a.get("json_data") or {}).get("description", "").lower() or desc_lower in a.get("description", "").lower()
-            ]
-        else:
-            agents = [
-                a for a in agents 
-                if desc_lower in (a.get("json_data") or {}).get("description", "").lower() or desc_lower in a.get("description", "").lower()
-            ]
+        matched_agents = []
+        for agent in agents:
+            data = agent.get("json_data") or {}
+            target_text = (
+                str(agent.get("name", "")) + " " + 
+                str(agent.get("description", "")) + " " + 
+                str(data.get("name", "")) + " " + 
+                str(data.get("description", "")) + " " + 
+                " ".join(str(c) for c in (data.get("capabilities", {}).get("canonical_capabilities", []) + data.get("capabilities", {}).get("raw_capabilities", []) if isinstance(data.get("capabilities"), dict) else data.get("capabilities", [])))
+            ).lower()
+            
+            if match == "exact":
+                if desc_lower == agent.get("description", "").lower() or desc_lower == data.get("description", "").lower():
+                    matched_agents.append(agent)
+            else:
+                # Partial: check if query words are in the combined text
+                if all(word in target_text for word in desc_lower.split()):
+                    matched_agents.append(agent)
+        agents = matched_agents
     
-    # Apply skills filter
+    # Apply skills filter - checks skills AND capabilities
     if skills is not None:
         skills_lower = skills.lower()
         matched_agents = []
         for agent in agents:
-            agent_skills = (agent.get("json_data") or {}).get("skills", [])
-            # Skills can be strings or objects with a name property
+            data = agent.get("json_data") or {}
+            agent_skills = data.get("skills", [])
+            caps = data.get("capabilities", {})
+            
+            # Combine skills and capabilities for searching
+            search_pool = [str(s.get("name", "") if isinstance(s, dict) else s) for s in agent_skills]
+            if isinstance(caps, dict):
+                search_pool.extend([str(c) for c in caps.get("canonical_capabilities", [])])
+                search_pool.extend([str(c) for c in caps.get("normalized_capabilities", [])])
+                raw = caps.get("raw_capabilities", [])
+                if isinstance(raw, dict):
+                    search_pool.extend([str(k) for k, v in raw.items() if v is True])
+                else:
+                    search_pool.extend([str(c) for c in (raw if isinstance(raw, list) else [])])
+            elif isinstance(caps, list):
+                search_pool.extend([str(c) for c in caps])
+                
             found = False
-            for s in agent_skills:
-                skill_text = s.get("name", "") if isinstance(s, dict) else str(s)
-                if skills_lower in skill_text.lower():
+            for pool_item in search_pool:
+                if skills_lower in pool_item.lower():
                     found = True
                     break
             if found:
@@ -137,7 +160,12 @@ def search_agents(
         # Map flags and health (consistent with agent_service.py)
         agent["approved"] = 1 if agent.get("approval_status") == "approved" else 0
         agent["deregistered"] = 1 if agent.get("approval_status") == "deregistered" else 0
-        agent["status"] = agent.get("health", "unknown")
+        
+        if agent.get("approval_status") == "deregistered":
+            agent["status"] = "deregistered"
+        else:
+            agent["status"] = agent.get("health", "unknown")
+            
         agent["last_seen"] = agent.get("last_checked")
 
     return {
