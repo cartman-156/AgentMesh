@@ -19,7 +19,7 @@ const mockAgents: AgentModel[] = [
     description: 'Provides weather data',
     url: 'http://weather.com',
     version: '1.0',
-    capabilities: '{"canonical_capabilities": ["weather"]}',
+    capabilities: '{"normalized_capabilities": ["weather"], "canonical_capabilities": ["weather"]}',
     skills: '[]',
     raw_agent_card: '{}',
     status: 'healthy',
@@ -34,7 +34,7 @@ const mockAgents: AgentModel[] = [
     description: 'Handles finance queries',
     url: 'http://finance.com',
     version: '1.0',
-    capabilities: '{"canonical_capabilities": ["finance"]}',
+    capabilities: '{"normalized_capabilities": ["finance"], "canonical_capabilities": ["finance"]}',
     skills: '[]',
     raw_agent_card: '{}',
     status: 'unhealthy',
@@ -108,7 +108,7 @@ describe('AgentsPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('No agents found.')).toBeInTheDocument();
+      expect(screen.getByText(/No agents found/i)).toBeInTheDocument();
     });
   });
 

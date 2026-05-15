@@ -36,8 +36,28 @@ const getEnabledCapabilities = (agent: AgentModel) => {
       : agent.capabilities;
       
     if (!payload || typeof payload !== 'object') return [];
+
+    // Support structured object - prefer normalized/canonical for clean UI
+    let displayCaps: any = payload;
+    let isList = false;
+
+    if (payload.normalized_capabilities && Array.isArray(payload.normalized_capabilities)) {
+      displayCaps = payload.normalized_capabilities;
+      isList = true;
+    } else if (payload.canonical_capabilities && Array.isArray(payload.canonical_capabilities)) {
+      displayCaps = payload.canonical_capabilities;
+      isList = true;
+    } else if (payload.raw_capabilities) {
+      displayCaps = payload.raw_capabilities;
+      isList = Array.isArray(displayCaps);
+    }
+
+    if (isList) {
+      return (displayCaps as any[]).map(c => String(c).replace(/_/g, ' '));
+    }
     
-    return Object.entries(payload)
+    // Fallback for flat dictionary of booleans
+    return Object.entries(displayCaps)
       .filter(([_, value]) => value === true)
       .map(([key]) => key.replace(/_/g, ' '));
   } catch {
@@ -98,6 +118,9 @@ const AgentCard = ({
             })()}
           </div>
           <p className="agent-card__meta">ID: {String(agent?.id ?? 'N/A')}</p>
+          {agent?.description && (
+            <p className="agent-card__description">{String(agent.description)}</p>
+          )}
         </div>
         <div className="agent-card__status-row">
           <span className={statusClass}>{lifecycleStatus}</span>

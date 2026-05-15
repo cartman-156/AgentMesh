@@ -41,18 +41,30 @@ def search_agents(
     # Apply name filter
     if name is not None:
         name_lower = name.lower()
-        agents = [
-            a for a in agents 
-            if name_lower in (a.get("json_data") or {}).get("name", "").lower() or name_lower in a.get("name", "").lower()
-        ]
+        if match == "exact":
+            agents = [
+                a for a in agents 
+                if name_lower == (a.get("json_data") or {}).get("name", "").lower() or name_lower == a.get("name", "").lower()
+            ]
+        else:
+            agents = [
+                a for a in agents 
+                if name_lower in (a.get("json_data") or {}).get("name", "").lower() or name_lower in a.get("name", "").lower()
+            ]
         
     # Apply description filter
     if description is not None:
         desc_lower = description.lower()
-        agents = [
-            a for a in agents 
-            if desc_lower in (a.get("json_data") or {}).get("description", "").lower() or desc_lower in a.get("description", "").lower()
-        ]
+        if match == "exact":
+            agents = [
+                a for a in agents 
+                if desc_lower == (a.get("json_data") or {}).get("description", "").lower() or desc_lower in a.get("description", "").lower()
+            ]
+        else:
+            agents = [
+                a for a in agents 
+                if desc_lower in (a.get("json_data") or {}).get("description", "").lower() or desc_lower in a.get("description", "").lower()
+            ]
     
     # Apply skills filter
     if skills is not None:
@@ -76,20 +88,26 @@ def search_agents(
         capability_lower = capability.lower()
         matched_agents = []
         for agent in agents:
-            caps = (agent.get("json_data") or {}).get("capabilities", {})
+            caps_data = (agent.get("json_data") or {}).get("capabilities", {})
             
-            # Handle legacy structured format for filtering
-            if isinstance(caps, dict) and "raw_capabilities" in caps:
-                caps = caps["raw_capabilities"]
-                if not isinstance(caps, dict):
-                    caps = {c: True for c in (caps if isinstance(caps, list) else [])}
+            # Extract lists for checking
+            canonical = caps_data.get("canonical_capabilities", [])
+            normalized = caps_data.get("normalized_capabilities", [])
+            raw = caps_data.get("raw_capabilities", [])
             
-            if isinstance(caps, dict):
-                # Match against keys (capability names) if they are true
-                for cap_name, enabled in caps.items():
-                    if enabled is True and capability_lower in cap_name.lower():
-                        matched_agents.append(agent)
-                        break
+            # If raw is a dict (boolean flags), convert to list of keys
+            if isinstance(raw, dict):
+                raw = [k for k, v in raw.items() if v is True]
+            
+            # Check all three tiers
+            found = False
+            for c in canonical + normalized + raw:
+                if capability_lower in str(c).lower():
+                    found = True
+                    break
+            
+            if found:
+                matched_agents.append(agent)
         agents = matched_agents
     
     # Finalize results for UI

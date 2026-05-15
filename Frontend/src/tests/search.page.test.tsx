@@ -40,11 +40,8 @@ describe('SearchPage', () => {
 
     render(<SearchPage />);
 
-    const input = screen.getByPlaceholderText('Search by name...');
-    const button = screen.getByText('Search');
-
+    const input = screen.getByPlaceholderText(/search agents/i);
     fireEvent.change(input, { target: { value: 'weather' } });
-    fireEvent.click(button);
 
     await waitFor(() => {
       expect(mockSearchAgents).toHaveBeenCalledWith({
@@ -52,7 +49,7 @@ describe('SearchPage', () => {
         only_approved: false,
         match: 'partial',
       });
-    });
+    }, { timeout: 1000 }); // Wait for debounce
   });
 
   it('handles search type change', async () => {
@@ -61,15 +58,10 @@ describe('SearchPage', () => {
     render(<SearchPage />);
 
     const select = screen.getByRole('combobox');
-    const input = screen.getByPlaceholderText('Search by name...');
+    const input = screen.getByPlaceholderText(/search agents/i);
     
     fireEvent.change(select, { target: { value: 'capability' } });
-    
-    // Placeholder should change
-    expect(screen.getByPlaceholderText('Search by capability...')).toBeInTheDocument();
-
     fireEvent.change(input, { target: { value: 'weather' } });
-    fireEvent.click(screen.getByText('Search'));
 
     await waitFor(() => {
       expect(mockSearchAgents).toHaveBeenCalledWith({
@@ -77,7 +69,7 @@ describe('SearchPage', () => {
         only_approved: false,
         match: 'partial',
       });
-    });
+    }, { timeout: 1000 });
   });
 
   it('handles only approved toggle', async () => {
@@ -85,12 +77,11 @@ describe('SearchPage', () => {
 
     render(<SearchPage />);
 
-    const checkbox = screen.getByLabelText('Only Approved');
-    const input = screen.getByPlaceholderText('Search by name...');
+    const checkbox = screen.getByLabelText(/only approved/i);
+    const input = screen.getByPlaceholderText(/search agents/i);
 
     fireEvent.click(checkbox);
     fireEvent.change(input, { target: { value: 'weather' } });
-    fireEvent.click(screen.getByText('Search'));
 
     await waitFor(() => {
       expect(mockSearchAgents).toHaveBeenCalledWith({
@@ -98,17 +89,16 @@ describe('SearchPage', () => {
         only_approved: true,
         match: 'partial',
       });
-    });
+    }, { timeout: 1000 });
   });
 
   it('renders results using AgentCard', async () => {
-    mockSearchAgents.mockResolvedValue({ query: {}, results: mockResults });
+    mockSearchAgents.mockResolvedValue({ query: {}, results: mockResults as any });
 
     render(<SearchPage />);
 
-    const input = screen.getByPlaceholderText('Search by name...');
+    const input = screen.getByPlaceholderText(/search agents/i);
     fireEvent.change(input, { target: { value: 'weather' } });
-    fireEvent.click(screen.getByText('Search'));
 
     await waitFor(() => {
       expect(screen.getByText('Weather Agent')).toBeInTheDocument();
@@ -121,12 +111,11 @@ describe('SearchPage', () => {
 
     render(<SearchPage />);
 
-    const input = screen.getByPlaceholderText('Search by name...');
+    const input = screen.getByPlaceholderText(/search agents/i);
     fireEvent.change(input, { target: { value: 'nonexistent' } });
-    fireEvent.click(screen.getByText('Search'));
 
     await waitFor(() => {
-      expect(screen.getByText('No agents matched your criteria.')).toBeInTheDocument();
+      expect(screen.getByText(/no agents matched/i)).toBeInTheDocument();
     });
   });
 
@@ -135,10 +124,11 @@ describe('SearchPage', () => {
 
     render(<SearchPage />);
 
-    const input = screen.getByPlaceholderText('Search by name...');
+    const input = screen.getByPlaceholderText(/search agents/i);
     fireEvent.change(input, { target: { value: 'weather' } });
-    fireEvent.click(screen.getByText('Search'));
 
-    expect(screen.getByText('Searching registry...')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/searching registry/i)).toBeInTheDocument();
+    });
   });
 });

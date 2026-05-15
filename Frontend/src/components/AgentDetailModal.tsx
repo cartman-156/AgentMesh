@@ -303,13 +303,38 @@ const AgentDetailModal = ({ agentId, onClose, onActionComplete }: any) => {
                 <div className="capabilities-grid">
                   {agent.capabilities && (() => {
                     try {
-                      const caps = typeof agent.capabilities === 'string'
+                      const payload = typeof agent.capabilities === 'string'
                         ? JSON.parse(agent.capabilities || '{}')
                         : agent.capabilities;
                         
-                      if (!caps || typeof caps !== 'object') return null;
+                      if (!payload || typeof payload !== 'object') return null;
                       
-                      return Object.entries(caps).map(([name, value]) => (
+                      // Handle structured normalization object
+                      let displayCaps: any = payload;
+                      let isList = false;
+                      
+                      if (payload.normalized_capabilities && Array.isArray(payload.normalized_capabilities)) {
+                        displayCaps = payload.normalized_capabilities;
+                        isList = true;
+                      } else if (payload.raw_capabilities) {
+                        displayCaps = payload.raw_capabilities;
+                        isList = Array.isArray(displayCaps);
+                      }
+                      
+                      if (isList) {
+                        return (displayCaps as any[]).map((name) => (
+                          <div key={String(name)} className="capability-item">
+                            <span className="capability-icon capability-icon--true">
+                              <CheckIcon />
+                            </span>
+                            <span className="capability-name">
+                              {String(name).replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                        ));
+                      }
+                      
+                      return Object.entries(displayCaps).map(([name, value]) => (
                         <div key={name} className="capability-item">
                           <span className={`capability-icon ${value ? 'capability-icon--true' : 'capability-icon--false'}`}>
                             {value ? <CheckIcon /> : <CloseIcon />}
